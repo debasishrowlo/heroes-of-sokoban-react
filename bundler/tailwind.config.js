@@ -39,25 +39,6 @@ module.exports = {
   theme: {
     extend: {
       borderRadius: generateBorderRadius(24),
-      colors: {
-        purple: {
-          100: "#928CFF",
-          200: "#483EFF",
-        },
-        red: "#EE374A",
-        blue: {
-          100: "#BEE2FD",
-          200: "#ABBCFF",
-          300: "#164A8A",
-          400: "#022959",
-        },
-        gray: {
-          100: "#F8F9FF",
-          200: "#EFF5FF",
-          300: "#D6D9E6",
-          400: "#9699AA",
-        },
-      },
       fontFamily: {
         'sans': ['Ubuntu', ...defaultTheme.fontFamily.sans],
       },
