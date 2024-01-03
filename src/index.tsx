@@ -85,6 +85,10 @@ const App = () => {
   const { level, margin, position } = state
 
   const handleMove = (e:KeyboardEvent) => {
+    if (state.gameStatus === gameStatuses.win) {
+      return 
+    }
+
     let newPosition = null
 
     if (e.key === "ArrowUp" || e.key === "w") {
@@ -120,6 +124,7 @@ const App = () => {
         newPosition.x === level.goal.x && 
         newPosition.y === level.goal.y
       ) {
+        newState.gameStatus = gameStatuses.win
         setTimeout(() => {
           console.log("load next level")
         }, 1000)
