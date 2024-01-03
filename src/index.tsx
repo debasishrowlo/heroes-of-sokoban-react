@@ -4,6 +4,7 @@ import { createRoot } from "react-dom/client"
 import "./index.css"
 
 const enum gameStatuses { 
+  loading = "loading",
   playing = "playing",
   win = "win",
 }
@@ -11,13 +12,13 @@ const enum gameStatuses {
 const enum tileTypes {
   empty = 0,
   floor = 1,
-  goal = 2,
 }
 
 type Level = {
   tilemap: Tilemap,
   cellsPerRow: number,
-  goal: Position,
+  playerPosition: Position,
+  goalPosition: Position,
 }
 
 type Position = {
@@ -28,7 +29,7 @@ type Position = {
 type Tilemap = number[]
 
 type State = {
-  level: Level,
+  levelIndex: number,
   gameStatus: gameStatuses,
   position: Position,
   margin: {
@@ -49,8 +50,8 @@ const getNextPosition = (level:Level, position:Position):Position|null => {
   return position
 }
 
-const App = () => {
-  const initialLevel = {
+const levels:Level[] = [
+  {
     tilemap: [
       0, 1, 0, 1, 0,
       1, 1, 1, 1, 0,
@@ -59,33 +60,86 @@ const App = () => {
       0, 1, 1, 1, 0,
     ],
     cellsPerRow: 5,
-    goal: {
-      x: 1,
-      y: 0,
-    }
-  }
-  const rows = Math.ceil(initialLevel.tilemap.length / initialLevel.cellsPerRow)
-  const cols = initialLevel.cellsPerRow
-
-  const cellSize = 50
-  const playerSize = 30
-
-  const [state, setState] = useState<State>({
-    level: initialLevel,
-    gameStatus: gameStatuses.playing,
-    position: {
+    playerPosition: {
       x: 2,
       y: 2,
     },
-    margin: {
-      left: (window.innerWidth - (rows * cellSize)) / 2,
-      top: (window.innerHeight - (cols * cellSize)) / 2,
+    goalPosition: {
+      x: 1,
+      y: 0,
+    }
+  },
+  {
+    tilemap: [
+      0, 1, 0, 1, 0,
+      1, 1, 1, 1, 0,
+      0, 1, 1, 1, 1,
+      1, 1, 1, 1, 0,
+      1, 1, 1, 1, 0,
+    ],
+    cellsPerRow: 5,
+    playerPosition: {
+      x: 0,
+      y: 4,
     },
-  })
-  const { level, margin, position } = state
+    goalPosition: {
+      x: 1,
+      y: 0,
+    }
+  },
+  {
+    tilemap: [
+      1, 1, 0, 1, 1,
+      1, 1, 1, 1, 0,
+      1, 1, 1, 1, 1,
+      1, 1, 1, 1, 0,
+      1, 1, 1, 1, 0,
+    ],
+    cellsPerRow: 5,
+    playerPosition: {
+      x: 4,
+      y: 2,
+    },
+    goalPosition: {
+      x: 1,
+      y: 0,
+    }
+  },
+]
+
+const cellSize = 50
+const playerSize = 30
+
+const loadLevel = (index:number):State => {
+  const level = levels[index]
+  const state = {
+    levelIndex: index,
+    gameStatus: gameStatuses.playing,
+    position: { ...level.playerPosition },
+    margin: {
+      left: 0,
+      top: 0,
+    },
+  }
+  const rows = Math.ceil(level.tilemap.length / level.cellsPerRow)
+  const cols = level.cellsPerRow
+  state.margin.left = (window.innerWidth - (rows * cellSize)) / 2
+  state.margin.top = (window.innerHeight - (cols * cellSize)) / 2
+
+  return state
+}
+
+const App = () => {
+  const initialLevel = levels[0]
+  const rows = Math.ceil(initialLevel.tilemap.length / initialLevel.cellsPerRow)
+  const cols = initialLevel.cellsPerRow
+
+  const [state, setState] = useState<State>(loadLevel(0))
+  const { margin, position } = state
+  const level = levels[state.levelIndex]
 
   const handleMove = (e:KeyboardEvent) => {
-    if (state.gameStatus === gameStatuses.win) {
+    if (state.gameStatus !== gameStatuses.playing) {
       return 
     }
 
@@ -121,13 +175,19 @@ const App = () => {
       }
 
       if (
-        newPosition.x === level.goal.x && 
-        newPosition.y === level.goal.y
+        newPosition.x === level.goalPosition.x && 
+        newPosition.y === level.goalPosition.y
       ) {
-        newState.gameStatus = gameStatuses.win
-        setTimeout(() => {
-          console.log("load next level")
-        }, 1000)
+        const nextLevelIndex = state.levelIndex + 1
+
+        if (nextLevelIndex < levels.length) {
+          newState.gameStatus = gameStatuses.loading
+          setTimeout(() => {
+            setState(loadLevel(state.levelIndex + 1))
+          }, 300)
+        } else {
+          alert("You win!!")
+        }
       }
 
       setState(newState)
@@ -148,12 +208,16 @@ const App = () => {
   }, [state])
 
   const goalPosition = {
-    x: (level.goal.x * cellSize) + (cellSize / 2) - (playerSize / 2),
-    y: (level.goal.y * cellSize) + (cellSize / 2) - (playerSize / 2),
+    x: (level.goalPosition.x * cellSize) + (cellSize / 2) - (playerSize / 2),
+    y: (level.goalPosition.y * cellSize) + (cellSize / 2) - (playerSize / 2),
   }
   const playerPosition = {
     x: (position.x * cellSize) + (cellSize / 2) - (playerSize / 2),
     y: (position.y * cellSize) + (cellSize / 2) - (playerSize / 2),
+  }
+
+  if (state.gameStatus === gameStatuses.loading) {
+    return null
   }
 
   return (
@@ -170,33 +234,18 @@ const App = () => {
             {Array.from(Array(cols).keys()).map((col) => {
               let bgColor = "bg-black"
               let borderColor = "border-transparent"
-              const cellValue = getCellValue(level, { x: col, y: row })
-              if (
-                cellValue === tileTypes.floor || 
-                cellValue === tileTypes.goal
-              ) {
+
+              if (getCellValue(level, { x: col, y: row }) === tileTypes.floor) {
                 bgColor = "bg-white"
                 borderColor = "border-gray-200"
               }
-
-              // const hasGoal = cellValue === tileTypes.goal
-              const hasGoal = cellValue === tileTypes.goal
 
               return (
                 <div 
                   className={`relative flex items-center justify-center border ${borderColor} ${bgColor} aspect-square`}
                   style={{ width: `${cellSize}px` }}
                   key={`col-${col}`}
-                >
-                  {hasGoal && (
-                    <div 
-                      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-yellow-600 rounded-full aspect-square"
-                      style={{
-                        width: `${playerSize}px`,
-                      }}
-                    ></div>
-                  )}
-                </div>
+                />
               )
             })}
           </div>
@@ -209,7 +258,7 @@ const App = () => {
           left: `${goalPosition.x}px`,
           top: `${goalPosition.y}px`,
         }}
-      ></div>
+      />
       <div 
         className="absolute aspect-square bg-red-600 rounded-full transition-all duration-150"
         style={{
@@ -217,7 +266,7 @@ const App = () => {
           left: `${playerPosition.x}px`,
           top: `${playerPosition.y}px`,
         }}
-      ></div>
+      />
     </div>
   )
 }
