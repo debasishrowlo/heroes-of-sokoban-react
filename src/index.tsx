@@ -17,6 +17,7 @@ const enum tileTypes {
 type Level = {
   tilemap: Tilemap,
   cellsPerRow: number,
+  goal: Position,
 }
 
 type Position = {
@@ -51,13 +52,17 @@ const getNextPosition = (level:Level, position:Position):Position|null => {
 const App = () => {
   const initialLevel = {
     tilemap: [
-      0, 2, 0, 1, 0,
+      0, 1, 0, 1, 0,
       1, 1, 1, 1, 0,
       0, 1, 1, 1, 1,
       0, 1, 1, 1, 0,
       0, 1, 1, 1, 0,
     ],
     cellsPerRow: 5,
+    goal: {
+      x: 1,
+      y: 0,
+    }
   }
   const rows = Math.ceil(initialLevel.tilemap.length / initialLevel.cellsPerRow)
   const cols = initialLevel.cellsPerRow
@@ -111,9 +116,10 @@ const App = () => {
         position: newPosition
       }
 
-      const cellValue = getCellValue(level, newPosition)
-      console.log({ cellValue, newPosition })
-      if (cellValue === tileTypes.goal) {
+      if (
+        newPosition.x === level.goal.x && 
+        newPosition.y === level.goal.y
+      ) {
         setTimeout(() => {
           console.log("load next level")
         }, 1000)
@@ -124,10 +130,6 @@ const App = () => {
   }
 
   const handleResize = () => {
-    console.log({
-      left: (window.innerWidth - (rows * cellSize)),
-      top: (window.innerHeight - (cols * cellSize)),
-    })
   }
 
   useEffect(() => {
@@ -140,17 +142,27 @@ const App = () => {
     }
   }, [state])
 
+  const goalPosition = {
+    x: (level.goal.x * cellSize) + (cellSize / 2) - (playerSize / 2),
+    y: (level.goal.y * cellSize) + (cellSize / 2) - (playerSize / 2),
+  }
+  const playerPosition = {
+    x: (position.x * cellSize) + (cellSize / 2) - (playerSize / 2),
+    y: (position.y * cellSize) + (cellSize / 2) - (playerSize / 2),
+  }
+
   return (
-    <div style={{
-      marginLeft: `${margin.left}px`,
-      marginTop: `${margin.top}px`,
-    }}>
+    <div 
+      className="relative"
+      style={{
+        marginLeft: `${margin.left}px`,
+        marginTop: `${margin.top}px`,
+      }}
+    >
       {Array.from(Array(rows).keys()).map(row => {
         return (
           <div className="flex" key={`row-${row}`}>
             {Array.from(Array(cols).keys()).map((col) => {
-              const hasCharacter = row === position.y && col === position.x
-
               let bgColor = "bg-black"
               let borderColor = "border-transparent"
               const cellValue = getCellValue(level, { x: col, y: row })
@@ -162,6 +174,7 @@ const App = () => {
                 borderColor = "border-gray-200"
               }
 
+              // const hasGoal = cellValue === tileTypes.goal
               const hasGoal = cellValue === tileTypes.goal
 
               return (
@@ -178,20 +191,28 @@ const App = () => {
                       }}
                     ></div>
                   )}
-                  {hasCharacter && (
-                    <div 
-                      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 aspect-square bg-red-600 rounded-full"
-                      style={{
-                        width: `${playerSize}px`,
-                      }}
-                    ></div>
-                  )}
                 </div>
               )
             })}
           </div>
         )
       })}
+      <div 
+        className="absolute bg-yellow-600 rounded-full aspect-square"
+        style={{
+          width: `${playerSize}px`,
+          left: `${goalPosition.x}px`,
+          top: `${goalPosition.y}px`,
+        }}
+      ></div>
+      <div 
+        className="absolute aspect-square bg-red-600 rounded-full transition-all duration-150"
+        style={{
+          width: `${playerSize}px`,
+          left: `${playerPosition.x}px`,
+          top: `${playerPosition.y}px`,
+        }}
+      ></div>
     </div>
   )
 }
