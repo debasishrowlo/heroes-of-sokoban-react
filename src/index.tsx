@@ -12,6 +12,7 @@ const enum gameStatuses {
 const enum tileTypes {
   empty = 0,
   floor = 1,
+  wall = 2,
 }
 
 type Level = {
@@ -43,7 +44,7 @@ const getCellValue = (level:Level, position:Position) => {
 }
 
 const getNextPosition = (level:Level, position:Position):Position|null => {
-  if (getCellValue(level, position) === 0) {
+  if (getCellValue(level, position) !== tileTypes.floor) {
     return null
   }
 
@@ -53,20 +54,22 @@ const getNextPosition = (level:Level, position:Position):Position|null => {
 const levels:Level[] = [
   {
     tilemap: [
-      0, 1, 0, 1, 0,
-      1, 1, 1, 1, 0,
-      0, 1, 1, 1, 1,
-      0, 1, 1, 1, 0,
-      0, 1, 1, 1, 0,
+      0, 2, 2, 2, 2, 2, 0,
+      2, 2, 1, 2, 1, 2, 0,
+      2, 1, 1, 1, 1, 2, 2,
+      2, 2, 1, 1, 1, 1, 2,
+      0, 2, 1, 1, 1, 2, 2,
+      0, 2, 1, 1, 1, 2, 0,
+      0, 2, 2, 2, 2, 2, 0,
     ],
-    cellsPerRow: 5,
+    cellsPerRow: 7,
     playerPosition: {
-      x: 2,
-      y: 2,
+      x: 3,
+      y: 3,
     },
     goalPosition: {
-      x: 1,
-      y: 0,
+      x: 2,
+      y: 1,
     }
   },
   {
@@ -115,6 +118,7 @@ const loadLevel = (index:number):State => {
   const state = {
     levelIndex: index,
     gameStatus: gameStatuses.playing,
+    cellsPerRow: level.cellsPerRow,
     position: { ...level.playerPosition },
     margin: {
       left: 0,
@@ -130,13 +134,13 @@ const loadLevel = (index:number):State => {
 }
 
 const App = () => {
-  const initialLevel = levels[0]
-  const rows = Math.ceil(initialLevel.tilemap.length / initialLevel.cellsPerRow)
-  const cols = initialLevel.cellsPerRow
+  // const initialLevel = levels[0]
 
   const [state, setState] = useState<State>(loadLevel(0))
   const { margin, position } = state
   const level = levels[state.levelIndex]
+  const rows = Math.ceil(level.tilemap.length / level.cellsPerRow)
+  const cols = level.cellsPerRow
 
   const handleMove = (e:KeyboardEvent) => {
     if (state.gameStatus !== gameStatuses.playing) {
@@ -235,9 +239,13 @@ const App = () => {
               let bgColor = "bg-black"
               let borderColor = "border-transparent"
 
-              if (getCellValue(level, { x: col, y: row }) === tileTypes.floor) {
+              const cellValue = getCellValue(level, { x: col, y: row })
+              if (cellValue === tileTypes.floor) {
                 bgColor = "bg-white"
                 borderColor = "border-gray-200"
+              } else if (cellValue === tileTypes.wall) {
+                bgColor = "bg-gray-700"
+                borderColor = "border-gray-700"
               }
 
               return (
