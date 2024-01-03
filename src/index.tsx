@@ -3,9 +3,15 @@ import { createRoot } from "react-dom/client"
 
 import "./index.css"
 
-type Position = {
-  x: number,
-  y: number,
+const enum gameStatuses { 
+  playing = "playing",
+  win = "win",
+}
+
+const enum tileTypes {
+  empty = 0,
+  floor = 1,
+  goal = 2,
 }
 
 type Level = {
@@ -13,10 +19,16 @@ type Level = {
   cellsPerRow: number,
 }
 
+type Position = {
+  x: number,
+  y: number,
+}
+
 type Tilemap = number[]
 
 type State = {
   level: Level,
+  gameStatus: gameStatuses,
   position: Position,
   margin: {
     left: number,
@@ -37,15 +49,14 @@ const getNextPosition = (level:Level, position:Position):Position|null => {
 }
 
 const App = () => {
-  const levelTilemap = [
-    0, 1, 0, 1, 0,
-    1, 1, 1, 1, 0,
-    0, 1, 1, 1, 1,
-    0, 1, 1, 1, 0,
-    0, 1, 1, 1, 0,
-  ]
   const initialLevel = {
-    tilemap: levelTilemap,
+    tilemap: [
+      0, 2, 0, 1, 0,
+      1, 1, 1, 1, 0,
+      0, 1, 1, 1, 1,
+      0, 1, 1, 1, 0,
+      0, 1, 1, 1, 0,
+    ],
     cellsPerRow: 5,
   }
   const rows = Math.ceil(initialLevel.tilemap.length / initialLevel.cellsPerRow)
@@ -56,6 +67,7 @@ const App = () => {
 
   const [state, setState] = useState<State>({
     level: initialLevel,
+    gameStatus: gameStatuses.playing,
     position: {
       x: 2,
       y: 2,
@@ -92,8 +104,22 @@ const App = () => {
       })
     }
 
+
     if (newPosition) {
-      setState({ ...state, position: newPosition })
+      let newState = {
+        ...state,
+        position: newPosition
+      }
+
+      const cellValue = getCellValue(level, newPosition)
+      console.log({ cellValue, newPosition })
+      if (cellValue === tileTypes.goal) {
+        setTimeout(() => {
+          console.log("load next level")
+        }, 1000)
+      }
+
+      setState(newState)
     }
   }
 
@@ -128,20 +154,33 @@ const App = () => {
               let bgColor = "bg-black"
               let borderColor = "border-transparent"
               const cellValue = getCellValue(level, { x: col, y: row })
-              if (cellValue === 1) {
+              if (
+                cellValue === tileTypes.floor || 
+                cellValue === tileTypes.goal
+              ) {
                 bgColor = "bg-white"
                 borderColor = "border-gray-200"
               }
 
+              const hasGoal = cellValue === tileTypes.goal
+
               return (
                 <div 
-                  className={`flex items-center justify-center border ${borderColor} ${bgColor} aspect-square`}
+                  className={`relative flex items-center justify-center border ${borderColor} ${bgColor} aspect-square`}
                   style={{ width: `${cellSize}px` }}
                   key={`col-${col}`}
                 >
+                  {hasGoal && (
+                    <div 
+                      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-yellow-600 rounded-full aspect-square"
+                      style={{
+                        width: `${playerSize}px`,
+                      }}
+                    ></div>
+                  )}
                   {hasCharacter && (
                     <div 
-                      className="aspect-square bg-red-600 rounded-full"
+                      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 aspect-square bg-red-600 rounded-full"
                       style={{
                         width: `${playerSize}px`,
                       }}
