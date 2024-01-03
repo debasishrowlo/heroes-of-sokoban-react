@@ -74,44 +74,52 @@ const levels:Level[] = [
   },
   {
     tilemap: [
-      0, 1, 0, 1, 0,
-      1, 1, 1, 1, 0,
-      0, 1, 1, 1, 1,
-      1, 1, 1, 1, 0,
-      1, 1, 1, 1, 0,
+      0, 2, 2, 2, 2, 2, 0,
+      2, 2, 1, 2, 1, 2, 0,
+      2, 1, 1, 1, 1, 2, 2,
+      2, 2, 1, 1, 1, 1, 2, 
+      2, 1, 1, 1, 1, 2, 2, 
+      2, 1, 1, 1, 1, 2, 0,
+      2, 2, 2, 2, 2, 2, 0,
     ],
-    cellsPerRow: 5,
+    cellsPerRow: 7,
     playerPosition: {
-      x: 0,
+      x: 1,
       y: 4,
     },
     goalPosition: {
-      x: 1,
-      y: 0,
+      x: 2,
+      y: 1,
     }
   },
   {
     tilemap: [
-      1, 1, 0, 1, 1,
-      1, 1, 1, 1, 0,
-      1, 1, 1, 1, 1,
-      1, 1, 1, 1, 0,
-      1, 1, 1, 1, 0,
+      2, 2, 2, 2, 2, 2, 2,
+      2, 1, 1, 2, 1, 1, 2,
+      2, 1, 1, 1, 1, 2, 2,
+      2, 1, 1, 1, 1, 1, 2,
+      2, 1, 1, 1, 1, 2, 2,
+      2, 1, 1, 1, 1, 2, 0,
+      2, 2, 2, 2, 2, 2, 0,
     ],
-    cellsPerRow: 5,
+    cellsPerRow: 7,
     playerPosition: {
       x: 4,
       y: 2,
     },
     goalPosition: {
       x: 1,
-      y: 0,
+      y: 1,
     }
   },
 ]
 
 const cellSize = 50
 const playerSize = 30
+
+const getRows = (level:Level) => {
+  return Math.ceil(level.tilemap.length / level.cellsPerRow)
+}
 
 const loadLevel = (index:number):State => {
   const level = levels[index]
@@ -125,7 +133,7 @@ const loadLevel = (index:number):State => {
       top: 0,
     },
   }
-  const rows = Math.ceil(level.tilemap.length / level.cellsPerRow)
+  const rows = getRows(level)
   const cols = level.cellsPerRow
   state.margin.left = (window.innerWidth - (rows * cellSize)) / 2
   state.margin.top = (window.innerHeight - (cols * cellSize)) / 2
@@ -134,12 +142,11 @@ const loadLevel = (index:number):State => {
 }
 
 const App = () => {
-  // const initialLevel = levels[0]
-
   const [state, setState] = useState<State>(loadLevel(0))
   const { margin, position } = state
+
   const level = levels[state.levelIndex]
-  const rows = Math.ceil(level.tilemap.length / level.cellsPerRow)
+  const rows = getRows(level)
   const cols = level.cellsPerRow
 
   const handleMove = (e:KeyboardEvent) => {
