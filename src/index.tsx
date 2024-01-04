@@ -222,7 +222,8 @@ const App = () => {
       return 
     }
 
-    if (e.key === "r") {
+    console.log(e.key)
+    if (e.key === "r" || e.key === "R") {
       loadLevel(state.levelIndex)
       return
     }
@@ -230,13 +231,13 @@ const App = () => {
     let newState = { ...state }
     let direction:directions|null = null
 
-    if (e.key === "ArrowUp" || e.key === "w") {
+    if (e.key === "ArrowUp" || e.key === "w" || e.key === "W") {
       direction = directions.up
-    } else if (e.key === "ArrowLeft" || e.key === "a") {
+    } else if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") {
       direction = directions.left
-    } else if (e.key === "ArrowDown" || e.key === "s") {
+    } else if (e.key === "ArrowDown" || e.key === "s" || e.key === "S") {
       direction = directions.down
-    } else if (e.key === "ArrowRight" || e.key === "d") {
+    } else if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") {
       direction = directions.right
     }
 
@@ -369,7 +370,7 @@ const App = () => {
   return (
     <>
       <div className="px-6 fixed top-0 right-0">
-        <button 
+        <button
           type="button" 
           className="p-4 text-18 text-gray-100"
           onClick={() => showLevelSelect()}
