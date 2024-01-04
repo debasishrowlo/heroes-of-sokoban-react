@@ -11,6 +11,7 @@ const enum entityTypes {
 const enum gameStatuses { 
   loading = "loading",
   playing = "playing",
+  paused = "paused",
   win = "win",
 }
 
@@ -55,30 +56,25 @@ type Tilemap = number[]
 
 // TODO: Automatically surround level with walls
 const levels:Level[] = [
-  // {
-  //   tilemap: [
-  //     0, 2, 2, 2, 2, 2, 0,
-  //     2, 2, 1, 2, 1, 2, 0,
-  //     2, 1, 1, 1, 1, 2, 2,
-  //     2, 2, 1, 1, 1, 1, 2,
-  //     2, 1, 1, 1, 1, 1, 2,
-  //     2, 1, 1, 1, 1, 1, 2,
-  //     2, 2, 2, 2, 2, 2, 2,
-  //   ],
-  //   tilesPerRow: 7,
-  //   rocks: [
-  //     { x: 2, y: 4 },
-  //     { x: 3, y: 4 },
-  //   ],
-  //   playerPosition: {
-  //     x: 1,
-  //     y: 4,
-  //   },
-  //   goalPosition: {
-  //     x: 2,
-  //     y: 1,
-  //   }
-  // },
+  {
+    tilemap: [
+      2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+      2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
+      2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
+      2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
+      2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+    ],
+    tilesPerRow: 13,
+    rocks: [],
+    playerPosition: {
+      x: 2,
+      y: 2,
+    },
+    goalPosition: {
+      x: 10,
+      y: 2,
+    }
+  },
   {
     tilemap: [
       2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
@@ -231,15 +227,19 @@ const loadLevel = (index:number):State => {
 const App = () => {
   const [state, setState] = useState<State>(loadLevel(0))
   const { margin, position } = state
-  console.log(position.x, position.y)
 
   const level = levels[state.levelIndex]
   const rows = getRows(level)
   const cols = level.tilesPerRow
 
-  const handleMove = (e:KeyboardEvent) => {
+  const handleKeyDown = (e:KeyboardEvent) => {
     if (state.gameStatus !== gameStatuses.playing) {
       return 
+    }
+
+    if (e.key === "r") {
+      setState(loadLevel(state.levelIndex))
+      return
     }
 
     let newState = { ...state }
@@ -253,6 +253,10 @@ const App = () => {
       direction = directions.down
     } else if (e.key === "ArrowRight" || e.key === "d") {
       direction = directions.right
+    }
+
+    if (!direction) {
+      return
     }
 
     let entitiesToBeMoved:Array<{
@@ -307,17 +311,15 @@ const App = () => {
       }
     }
 
-    if (
-      newState.position.x === level.goalPosition.x && 
-      newState.position.y === level.goalPosition.y
-    ) {
+    if (arePositionsSame(newState.position, level.goalPosition)) {
       const nextLevelIndex = state.levelIndex + 1
 
+      newState.gameStatus = gameStatuses.paused
       if (nextLevelIndex < levels.length) {
-        newState.gameStatus = gameStatuses.loading
         setTimeout(() => {
+          newState.gameStatus = gameStatuses.loading
           setState(loadLevel(state.levelIndex + 1))
-        }, 300)
+        }, 500)
       } else {
         alert("You win!!")
       }
@@ -330,11 +332,11 @@ const App = () => {
   }
 
   useEffect(() => {
-    document.addEventListener("keydown", handleMove)
+    document.addEventListener("keydown", handleKeyDown)
     document.documentElement.addEventListener("onresize", handleResize)
 
     return () =>{
-      document.removeEventListener("keydown", handleMove)
+      document.removeEventListener("keydown", handleKeyDown)
       document.removeEventListener("resize", handleResize)
     }
   }, [state])
