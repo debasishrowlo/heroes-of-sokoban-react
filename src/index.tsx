@@ -55,28 +55,55 @@ type Tilemap = number[]
 
 // TODO: Automatically surround level with walls
 const levels:Level[] = [
+  // {
+  //   tilemap: [
+  //     0, 2, 2, 2, 2, 2, 0,
+  //     2, 2, 1, 2, 1, 2, 0,
+  //     2, 1, 1, 1, 1, 2, 2,
+  //     2, 2, 1, 1, 1, 1, 2,
+  //     2, 1, 1, 1, 1, 1, 2,
+  //     2, 1, 1, 1, 1, 1, 2,
+  //     2, 2, 2, 2, 2, 2, 2,
+  //   ],
+  //   tilesPerRow: 7,
+  //   rocks: [
+  //     { x: 2, y: 4 },
+  //     { x: 3, y: 4 },
+  //   ],
+  //   playerPosition: {
+  //     x: 1,
+  //     y: 4,
+  //   },
+  //   goalPosition: {
+  //     x: 2,
+  //     y: 1,
+  //   }
+  // },
   {
     tilemap: [
-      0, 2, 2, 2, 2, 2, 0,
-      2, 2, 1, 2, 1, 2, 0,
-      2, 1, 1, 1, 1, 2, 2,
-      2, 2, 1, 1, 1, 1, 2,
-      2, 1, 1, 1, 1, 1, 2,
-      2, 1, 1, 1, 1, 1, 2,
-      2, 2, 2, 2, 2, 2, 2,
+      2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+      2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2,
+      2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
+      2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2,
+      2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
     ],
-    tilesPerRow: 7,
+    tilesPerRow: 13,
     rocks: [
-      { x: 2, y: 4 },
-      { x: 3, y: 4 },
+      { x: 6, y: 1 },
+      { x: 6, y: 2 },
+      { x: 6, y: 3 },
+      { x: 8, y: 2 },
+      { x: 9, y: 2 },
+      { x: 10, y: 1 },
+      { x: 10, y: 3 },
     ],
     playerPosition: {
-      x: 1,
-      y: 4,
+      x: 2,
+      y: 2,
     },
     goalPosition: {
-      x: 2,
-      y: 1,
+      x: 10,
+      y: 2,
     }
   },
   {
@@ -195,8 +222,8 @@ const loadLevel = (index:number):State => {
   }
   const rows = getRows(level)
   const cols = level.tilesPerRow
-  state.margin.left = (window.innerWidth - (rows * tileSize)) / 2
-  state.margin.top = (window.innerHeight - (cols * tileSize)) / 2
+  state.margin.left = (window.innerWidth - (cols * tileSize)) / 2
+  state.margin.top = (window.innerHeight - (rows * tileSize)) / 2
 
   return state
 }
@@ -204,6 +231,7 @@ const loadLevel = (index:number):State => {
 const App = () => {
   const [state, setState] = useState<State>(loadLevel(0))
   const { margin, position } = state
+  console.log(position.x, position.y)
 
   const level = levels[state.levelIndex]
   const rows = getRows(level)
