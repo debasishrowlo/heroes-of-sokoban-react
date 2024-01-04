@@ -3,6 +3,11 @@ import { createRoot } from "react-dom/client"
 
 import "./index.css"
 
+const enum entityTypes {
+  player = "player",
+  rock = "rock",
+}
+
 const enum gameStatuses { 
   loading = "loading",
   playing = "playing",
@@ -15,11 +20,19 @@ const enum tileTypes {
   wall = 2,
 }
 
+const enum directions {
+  up = "up",
+  down = "down",
+  left = "left",
+  right = "right",
+}
+
 type Level = {
   tilemap: Tilemap,
-  cellsPerRow: number,
+  tilesPerRow: number,
   playerPosition: Position,
   goalPosition: Position,
+  rocks: Position[],
 }
 
 type Position = {
@@ -27,11 +40,10 @@ type Position = {
   y: number,
 }
 
-type Tilemap = number[]
-
 type State = {
   levelIndex: number,
   gameStatus: gameStatuses,
+  rocks: Position[],
   position: Position,
   margin: {
     left: number,
@@ -39,18 +51,9 @@ type State = {
   },
 }
 
-const getCellValue = (level:Level, position:Position) => {
-  return level.tilemap[position.y * level.cellsPerRow + position.x]
-}
+type Tilemap = number[]
 
-const getNextPosition = (level:Level, position:Position):Position|null => {
-  if (getCellValue(level, position) !== tileTypes.floor) {
-    return null
-  }
-
-  return position
-}
-
+// TODO: Automatically surround level with walls
 const levels:Level[] = [
   {
     tilemap: [
@@ -58,14 +61,18 @@ const levels:Level[] = [
       2, 2, 1, 2, 1, 2, 0,
       2, 1, 1, 1, 1, 2, 2,
       2, 2, 1, 1, 1, 1, 2,
-      0, 2, 1, 1, 1, 2, 2,
-      0, 2, 1, 1, 1, 2, 0,
-      0, 2, 2, 2, 2, 2, 0,
+      2, 1, 1, 1, 1, 1, 2,
+      2, 1, 1, 1, 1, 1, 2,
+      2, 2, 2, 2, 2, 2, 2,
     ],
-    cellsPerRow: 7,
+    tilesPerRow: 7,
+    rocks: [
+      { x: 2, y: 4 },
+      { x: 3, y: 4 },
+    ],
     playerPosition: {
-      x: 3,
-      y: 3,
+      x: 1,
+      y: 4,
     },
     goalPosition: {
       x: 2,
@@ -82,7 +89,8 @@ const levels:Level[] = [
       2, 1, 1, 1, 1, 2, 0,
       2, 2, 2, 2, 2, 2, 0,
     ],
-    cellsPerRow: 7,
+    rocks: [],
+    tilesPerRow: 7,
     playerPosition: {
       x: 1,
       y: 4,
@@ -102,7 +110,8 @@ const levels:Level[] = [
       2, 1, 1, 1, 1, 2, 0,
       2, 2, 2, 2, 2, 2, 0,
     ],
-    cellsPerRow: 7,
+    rocks: [],
+    tilesPerRow: 7,
     playerPosition: {
       x: 4,
       y: 2,
@@ -114,11 +123,61 @@ const levels:Level[] = [
   },
 ]
 
-const cellSize = 50
+const tileSize = 50
 const playerSize = 30
 
+const arePositionsSame = (p1:Position, p2:Position) => {
+  return p1.x === p2.x && p1.y === p2.y
+}
+
+const getTileValue = (level:Level, position:Position) => {
+  return level.tilemap[position.y * level.tilesPerRow + position.x]
+}
+
+const getNextTileInDirection = (position:Position, direction:directions, rows:number, cols:number):Position => {
+  if (direction === directions.up) {
+    return {
+      ...position,
+      y: Math.max(0, position.y - 1),
+    }
+  } else if (direction === directions.down) {
+    return {
+      ...position,
+      y: Math.min(rows - 1, position.y + 1),
+    }
+  } else if (direction === directions.left) {
+    return {
+      ...position,
+      x: Math.max(0, position.x - 1)
+    }
+  } else {
+    return {
+      ...position,
+      x: Math.min(cols - 1, position.x + 1)
+    }
+  }
+}
+
 const getRows = (level:Level) => {
-  return Math.ceil(level.tilemap.length / level.cellsPerRow)
+  return Math.ceil(level.tilemap.length / level.tilesPerRow)
+}
+
+const getNextPosition = (state:State, level:Level, position:Position):State|null => {
+  if (getTileValue(level, position) !== tileTypes.floor) {
+    return null
+  }
+
+  return {
+    ...state,
+    position: { ...position },
+  }
+}
+
+const getPosition = (position:Position, size:number):Position => {
+  return {
+    x: (position.x * tileSize) + (tileSize / 2) - (size / 2),
+    y: (position.y * tileSize) + (tileSize / 2) - (size / 2),
+  }
 }
 
 const loadLevel = (index:number):State => {
@@ -126,17 +185,18 @@ const loadLevel = (index:number):State => {
   const state = {
     levelIndex: index,
     gameStatus: gameStatuses.playing,
-    cellsPerRow: level.cellsPerRow,
+    tilesPerRow: level.tilesPerRow,
     position: { ...level.playerPosition },
+    rocks: level.rocks.map(rock => ({ ...rock })),
     margin: {
       left: 0,
       top: 0,
     },
   }
   const rows = getRows(level)
-  const cols = level.cellsPerRow
-  state.margin.left = (window.innerWidth - (rows * cellSize)) / 2
-  state.margin.top = (window.innerHeight - (cols * cellSize)) / 2
+  const cols = level.tilesPerRow
+  state.margin.left = (window.innerWidth - (rows * tileSize)) / 2
+  state.margin.top = (window.innerHeight - (cols * tileSize)) / 2
 
   return state
 }
@@ -147,62 +207,95 @@ const App = () => {
 
   const level = levels[state.levelIndex]
   const rows = getRows(level)
-  const cols = level.cellsPerRow
+  const cols = level.tilesPerRow
 
   const handleMove = (e:KeyboardEvent) => {
     if (state.gameStatus !== gameStatuses.playing) {
       return 
     }
 
-    let newPosition = null
+    let newState = { ...state }
+    let direction:directions|null = null
 
     if (e.key === "ArrowUp" || e.key === "w") {
-      newPosition = getNextPosition(level, {
-        ...position,
-        y: Math.max(0, position.y - 1),
-      })
+      direction = directions.up
     } else if (e.key === "ArrowLeft" || e.key === "a") {
-      newPosition = getNextPosition(level, {
-        ...position,
-        x: Math.max(0, position.x - 1)
-      })
+      direction = directions.left
     } else if (e.key === "ArrowDown" || e.key === "s") {
-      newPosition = getNextPosition(level, {
-        ...position,
-        y: Math.min(rows - 1, position.y + 1),
-      })
+      direction = directions.down
     } else if (e.key === "ArrowRight" || e.key === "d") {
-      newPosition = getNextPosition(level, {
-        ...position,
-        x: Math.min(cols - 1, position.x + 1),
-      })
+      direction = directions.right
     }
 
+    let entitiesToBeMoved:Array<{
+      type: entityTypes,
+      index?: number,
+    }> = [
+      { type: entityTypes.player },
+    ]
 
-    if (newPosition) {
-      let newState = {
-        ...state,
-        position: newPosition
+    let nextPosition = getNextTileInDirection(position, direction, rows, cols)
+    while (true) {
+      const tileValue = getTileValue(level, nextPosition)
+      const rockIndex = state.rocks.findIndex(rockPosition => arePositionsSame(rockPosition, nextPosition))
+
+      const containsRock = rockIndex !== -1
+      if (tileValue === tileTypes.floor && !containsRock) {
+        break
+      }
+      if (tileValue === tileTypes.wall) {
+        entitiesToBeMoved = []
+        break
       }
 
-      if (
-        newPosition.x === level.goalPosition.x && 
-        newPosition.y === level.goalPosition.y
-      ) {
-        const nextLevelIndex = state.levelIndex + 1
+      if (containsRock) {
+        entitiesToBeMoved.push({
+          type: entityTypes.rock,
+          index: rockIndex,
+        })
+      }
 
-        if (nextLevelIndex < levels.length) {
-          newState.gameStatus = gameStatuses.loading
-          setTimeout(() => {
-            setState(loadLevel(state.levelIndex + 1))
-          }, 300)
-        } else {
-          alert("You win!!")
+      nextPosition = getNextTileInDirection(nextPosition, direction, rows, cols)
+    }
+    
+    for (let i = 0; i < entitiesToBeMoved.length; i++) {
+      const entity = entitiesToBeMoved[i]
+
+      if (entity.type === entityTypes.player) {
+        const entityPosition = state.position
+        const nextPosition = getNextTileInDirection(entityPosition, direction, rows, cols)
+        newState = getNextPosition(state, level, nextPosition)
+      } else if (entity.type === entityTypes.rock) {
+        const entityPosition = state.rocks[entity.index]
+        const nextPosition = getNextTileInDirection(entityPosition, direction, rows, cols)
+        newState = {
+          ...newState,
+          rocks: [
+            ...newState.rocks.slice(0, entity.index),
+            { ...nextPosition },
+            ...newState.rocks.slice(entity.index + 1),
+          ]
         }
       }
-
-      setState(newState)
     }
+
+    if (
+      newState.position.x === level.goalPosition.x && 
+      newState.position.y === level.goalPosition.y
+    ) {
+      const nextLevelIndex = state.levelIndex + 1
+
+      if (nextLevelIndex < levels.length) {
+        newState.gameStatus = gameStatuses.loading
+        setTimeout(() => {
+          setState(loadLevel(state.levelIndex + 1))
+        }, 300)
+      } else {
+        alert("You win!!")
+      }
+    }
+
+    setState(newState)
   }
 
   const handleResize = () => {
@@ -218,14 +311,8 @@ const App = () => {
     }
   }, [state])
 
-  const goalPosition = {
-    x: (level.goalPosition.x * cellSize) + (cellSize / 2) - (playerSize / 2),
-    y: (level.goalPosition.y * cellSize) + (cellSize / 2) - (playerSize / 2),
-  }
-  const playerPosition = {
-    x: (position.x * cellSize) + (cellSize / 2) - (playerSize / 2),
-    y: (position.y * cellSize) + (cellSize / 2) - (playerSize / 2),
-  }
+  const goalPosition = getPosition(level.goalPosition, playerSize)
+  const playerPosition = getPosition(position, playerSize)
 
   if (state.gameStatus === gameStatuses.loading) {
     return null
@@ -246,11 +333,11 @@ const App = () => {
               let bgColor = "bg-black"
               let borderColor = "border-transparent"
 
-              const cellValue = getCellValue(level, { x: col, y: row })
-              if (cellValue === tileTypes.floor) {
+              const tileValue = getTileValue(level, { x: col, y: row })
+              if (tileValue === tileTypes.floor) {
                 bgColor = "bg-white"
                 borderColor = "border-gray-200"
-              } else if (cellValue === tileTypes.wall) {
+              } else if (tileValue === tileTypes.wall) {
                 bgColor = "bg-gray-700"
                 borderColor = "border-gray-700"
               }
@@ -258,7 +345,7 @@ const App = () => {
               return (
                 <div 
                   className={`relative flex items-center justify-center border ${borderColor} ${bgColor} aspect-square`}
-                  style={{ width: `${cellSize}px` }}
+                  style={{ width: `${tileSize}px` }}
                   key={`col-${col}`}
                 />
               )
@@ -267,7 +354,7 @@ const App = () => {
         )
       })}
       <div 
-        className="absolute bg-yellow-600 rounded-full aspect-square"
+        className="absolute bg-green-400 rounded-full aspect-square"
         style={{
           width: `${playerSize}px`,
           left: `${goalPosition.x}px`,
@@ -282,6 +369,21 @@ const App = () => {
           top: `${playerPosition.y}px`,
         }}
       />
+      {state.rocks.map(rockPosition => {
+        const size = playerSize
+        const position = getPosition(rockPosition, size)
+
+        return (
+          <div 
+            className="absolute aspect-square bg-amber-600 rounded-full transition-all duration-150"
+            style={{
+              width: `${size}px`,
+              left: `${position.x}px`,
+              top: `${position.y}px`,
+            }}
+          />
+        )
+      })}
     </div>
   )
 }
