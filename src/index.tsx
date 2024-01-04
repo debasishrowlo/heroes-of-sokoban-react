@@ -222,7 +222,6 @@ const App = () => {
       return 
     }
 
-    console.log(e.key)
     if (e.key === "r" || e.key === "R") {
       loadLevel(state.levelIndex)
       return
