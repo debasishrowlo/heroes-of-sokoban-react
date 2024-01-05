@@ -46,9 +46,6 @@ module.exports = {
       spacing: {
         "4.5": pxToRem(18),
       },
-      transitionDuration: {
-        "DEFAULT": "300ms",
-      }
     },
   },
   plugins: [],
