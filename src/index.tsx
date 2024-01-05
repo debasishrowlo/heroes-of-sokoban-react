@@ -127,8 +127,10 @@ const levels:Level[] = [
         ],
       }
     ],
-    // playerPosition: { x: 2, y: 2, },
-    playerPosition: { x: 5, y: 2, },
+    playerPosition: { x: 2, y: 2, },
+    rocks: [
+      { x: 4, y: 2 },
+    ],
     goalPosition: {
       x: 10,
       y: 2,
@@ -247,13 +249,12 @@ const getPosition = (position:V2, size:number):V2 => {
 const isGateOpen = (gateIndex:number, state:State):boolean => {
   const gate = state.switchGates[gateIndex]
 
-  // const allSwitchesPressed = isPlayerOnSwitch || isRockOnSwitch
   const allSwitchesPressed = gate.switches.every(switchPosition => {
     const playerPosition = state.position
     const isPlayerOnSwitch = v2Equal(switchPosition, playerPosition)
 
     const isRockOnSwitch = state.rocks.some(
-      rockPosition => v2Equal(rockPosition, gate.position)
+      rockPosition => v2Equal(rockPosition, switchPosition)
     )
 
     return isPlayerOnSwitch || isRockOnSwitch
@@ -274,8 +275,7 @@ const pauseTransitions = (duration:number) => {
 // TODO: switch gates block rock push
 
 const App = () => {
-  // const [state, setState] = useState<State>(generateLevel(0))
-  const [state, setState] = useState<State>(generateLevel(2))
+  const [state, setState] = useState<State>(generateLevel(0))
 
   const appHandleKeyDown = (e:KeyboardEvent) => {
     if (!state) { return }
@@ -483,22 +483,6 @@ const App = () => {
             top: `${goalPosition.y}px`,
           }}
         />
-        {state.rocks.map((rockPosition, index) => {
-          const size = playerSize
-          const position = getPosition(rockPosition, size)
-
-          return (
-            <div 
-              className="absolute aspect-square bg-amber-600 rounded-full transition-all"
-              key={`rock-${index}`}
-              style={{
-                width: `${size}px`,
-                left: `${position.x}px`,
-                top: `${position.y}px`,
-              }}
-            />
-          )
-        })}
         {state.switchGates.map((gate:SwitchGate, index:number) => {
           const size = tileSize
           const position = getPosition(gate.position, size)
@@ -613,6 +597,22 @@ const App = () => {
                 )
               })}
             </div>
+          )
+        })}
+        {state.rocks.map((rockPosition, index) => {
+          const size = playerSize
+          const position = getPosition(rockPosition, size)
+
+          return (
+            <div 
+              className="absolute aspect-square bg-amber-600 rounded-full transition-all"
+              key={`rock-${index}`}
+              style={{
+                width: `${size}px`,
+                left: `${position.x}px`,
+                top: `${position.y}px`,
+              }}
+            />
           )
         })}
         <div 
