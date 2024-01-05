@@ -138,41 +138,38 @@ const levels:Level[] = [
   },
   {
     tilemap: [
-      0, 2, 2, 2, 2, 2, 0,
-      2, 2, 1, 2, 1, 2, 0,
-      2, 1, 1, 1, 1, 2, 2,
-      2, 2, 1, 1, 1, 1, 2, 
-      2, 1, 1, 1, 1, 2, 2, 
-      2, 1, 1, 1, 1, 2, 0,
-      2, 2, 2, 2, 2, 2, 0,
+      2, 2, 2, 2, 2, 2, 2, 2, 2,
+      2, 1, 1, 1, 1, 1, 2, 1, 2,
+      2, 1, 2, 1, 1, 1, 2, 1, 2,
+      2, 1, 1, 1, 1, 1, 1, 1, 2,
+      2, 1, 1, 1, 1, 1, 1, 1, 2,
+      2, 1, 1, 1, 1, 1, 1, 1, 2,
+      2, 1, 1, 1, 1, 1, 1, 1, 2,
+      2, 2, 2, 2, 2, 2, 2, 2, 2,
     ],
-    tilesPerRow: 7,
+    tilesPerRow: 9,
     playerPosition: {
       x: 1,
       y: 4,
     },
-    goalPosition: {
-      x: 2,
-      y: 1,
-    }
-  },
-  {
-    tilemap: [
-      2, 2, 2, 2, 2, 2, 2,
-      2, 1, 1, 2, 1, 1, 2,
-      2, 1, 1, 1, 1, 2, 2,
-      2, 1, 1, 1, 1, 1, 2,
-      2, 1, 1, 1, 1, 2, 2,
-      2, 1, 1, 1, 1, 2, 0,
-      2, 2, 2, 2, 2, 2, 0,
+    rocks: [
+      { x: 3, y: 2 },
+      { x: 2, y: 3 },
+      { x: 3, y: 3 },
     ],
-    tilesPerRow: 7,
-    playerPosition: {
-      x: 4,
-      y: 2,
-    },
+    switchGates: [
+      {
+        color: "#f7e26b",
+        position: { x: 7, y: 2 },
+        switches: [
+          { x: 2, y: 5 },
+          { x: 4, y: 5 },
+          { x: 6, y: 5 },
+        ],
+      }
+    ],
     goalPosition: {
-      x: 1,
+      x: 7,
       y: 1,
     }
   },
@@ -583,35 +580,14 @@ const App = () => {
                     ></div>
                   )
                 })}
-                {/* {[
-                  { left: 0, top: 0, },
-                  { left: highlightSize * 4, top: 0, },
-
-                  { left: 0, top: highlightSize * 4, },
-                  { left: highlightSize * 4, top: highlightSize * 4, },
-                ].map((highlight, index) => {
-                  return (
-                    <div
-                      className="absolute aspect-square transition-all" 
-                      key={`open-highlight-${index}`}
-                      style={{
-                        backgroundColor: gate.color,
-                        opacity: isOpen ? 1 : 0,
-                        width: `${highlightSize}px`,
-                        left: `${highlight.left}px`,
-                        top: `${highlight.top}px`,
-                      }}
-                    ></div>
-                  )
-                })} */}
               </div>
               {gate.switches.map((switchPosition, index) => {
-                const size = tileSize / 2.5
+                const size = tileSize / 3
                 const position = getPosition(switchPosition, size)
 
                 return (
                   <div 
-                    className="w-10 aspect-square absolute"
+                    className="w-10 aspect-square absolute border border-gray-400"
                     key={`switch-${index}`}
                     style={{
                       width: `${size}px`,
