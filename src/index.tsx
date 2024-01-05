@@ -272,12 +272,10 @@ const pauseTransitions = (duration:number) => {
   }, duration)
 }
 
-// TODO: switch gates block rock push
-
 const App = () => {
   const [state, setState] = useState<State>(generateLevel(0))
 
-  const appHandleKeyDown = (e:KeyboardEvent) => {
+  const handleKeyDown = (e:KeyboardEvent) => {
     if (!state) { return }
 
     if (state.gameStatus !== gameStatuses.playing) {
@@ -317,22 +315,51 @@ const App = () => {
     let nextPosition = getNextTileInDirection(state.position, direction, rows, cols)
     while (true) {
       const tileValue = getTileValue(level, nextPosition)
-      const rockIndex = state.rocks.findIndex(rockPosition => v2Equal(rockPosition, nextPosition))
+      const tileIsFloor = tileValue === tileTypes.floor
 
-      const containsRock = rockIndex !== -1
-      if (tileValue === tileTypes.floor && !containsRock) {
-        break
+      const rockIndex = state.rocks.findIndex(rockPosition => v2Equal(rockPosition, nextPosition))
+      const tileContainsRock = rockIndex !== -1
+
+      const gateIndex = state.switchGates.findIndex(gate => v2Equal(gate.position, nextPosition))
+      const tileContainsGate = gateIndex !== -1
+
+      let tileContainsClosedGate = false
+      if (tileContainsGate) {
+        const gateIsClosed = !isGateOpen(gateIndex, state)
+        tileContainsClosedGate = gateIsClosed
       }
-      if (tileValue === tileTypes.wall) {
+
+      const tileIsEmpty = (
+        tileIsFloor && 
+        !tileContainsRock && 
+        !tileContainsClosedGate
+      )
+
+      const tileContainsWall = tileValue === tileTypes.wall
+
+      if (tileIsEmpty) {
+        break
+      } 
+
+      const tileContainsImmovableEntity = tileContainsWall || tileContainsClosedGate
+      
+      if (tileContainsImmovableEntity) {
         entitiesToBeMoved = []
         break
-      }
+      } 
 
-      if (containsRock) {
-        entitiesToBeMoved.push({
-          type: entityTypes.rock,
-          index: rockIndex,
-        })
+      const tileContainsMovableEntity = tileContainsRock
+      
+      if (tileContainsMovableEntity) {
+        if (tileContainsRock) {
+          entitiesToBeMoved = [
+            ...entitiesToBeMoved,
+            {
+              type: entityTypes.rock,
+              index: rockIndex,
+            }
+          ]
+        }
       }
 
       nextPosition = getNextTileInDirection(nextPosition, direction, rows, cols)
@@ -389,8 +416,8 @@ const App = () => {
   }
 
   useEffect(() => {
-    document.addEventListener("keydown", appHandleKeyDown)
-    return () => { document.removeEventListener("keydown", appHandleKeyDown) }
+    document.addEventListener("keydown", handleKeyDown)
+    return () => { document.removeEventListener("keydown", handleKeyDown) }
   }, [state])
 
   if (state === null) {
