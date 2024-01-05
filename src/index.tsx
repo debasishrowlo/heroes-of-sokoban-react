@@ -481,8 +481,8 @@ const App = () => {
 
                 const tileValue = getTileValue(level, { x: col, y: row })
                 if (tileValue === tileTypes.floor) {
-                  bgColor = "bg-white"
-                  borderColor = "border-gray-200"
+                  bgColor = "bg-gray-100"
+                  borderColor = "border-gray-300"
                 } else if (tileValue === tileTypes.wall) {
                   bgColor = "bg-gray-700"
                   borderColor = "border-gray-700"
@@ -608,7 +608,7 @@ const App = () => {
 
           return (
             <div 
-              className="absolute aspect-square bg-amber-600 rounded-full transition-all"
+              className="absolute aspect-square border-4 border-amber-800 bg-amber-600 rounded-full transition-all"
               key={`rock-${index}`}
               style={{
                 width: `${size}px`,
