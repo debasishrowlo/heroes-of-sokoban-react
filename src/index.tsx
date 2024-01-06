@@ -267,6 +267,38 @@ const levels:Level[] = [
       y: 1,
     }
   },
+  {
+    tilemap: [
+      2, 2, 2, 2, 2, 2, 2, 2, 2,
+      2, 1, 1, 1, 2, 2, 1, 1, 2,
+      2, 1, 2, 1, 1, 2, 2, 1, 2,
+      2, 1, 1, 1, 1, 1, 1, 1, 2,
+      2, 1, 2, 1, 2, 1, 2, 1, 2,
+      2, 1, 1, 1, 1, 1, 1, 1, 2,
+      2, 2, 2, 2, 2, 2, 2, 2, 2,
+    ],
+    tilesPerRow: 9,
+    player: {
+      type: playerTypes.thief,
+      position: { x: 5, y: 5, },
+    },
+    rocks: [
+      { x: 3, y: 5 },
+    ],
+    switchGates: [
+      {
+        color: "#f7e26b",
+        position: { x: 7, y: 2 },
+        switches: [
+          { x: 5, y: 3 },
+        ],
+      }
+    ],
+    goalPosition: {
+      x: 6,
+      y: 1,
+    }
+  },
 ]
 
 const tileSize = 50
@@ -372,8 +404,7 @@ const pauseTransitions = (duration:number) => {
 }
 
 const App = () => {
-  // const [state, setState] = useState<State>(generateLevel(0))
-  const [state, setState] = useState<State>(generateLevel(5))
+  const [state, setState] = useState<State>(generateLevel(0))
 
   const handleKeyDown = (e:KeyboardEvent) => {
     if (!state) { return }
