@@ -413,10 +413,6 @@ const App = () => {
   const [state, setState] = useState<State>(generateLevel(0))
   const [loading, setLoading] = useState(true)
 
-  const level = levels[state.levelIndex]
-  const rows = getRows(level)
-  const cols = level.tilesPerRow
-
   const handleKeyDown = (e:KeyboardEvent) => {
     if (!state) { return }
 
@@ -444,6 +440,10 @@ const App = () => {
     }
 
     if (!direction) { return }
+
+    const level = levels[state.levelIndex]
+    const rows = getRows(level)
+    const cols = level.tilesPerRow
 
     if (state.player.type === playerTypes.warrior) {
       let entitiesToBeMoved:Array<{
@@ -678,9 +678,11 @@ const App = () => {
     return null
   }
 
-  const goalWidth = tileSize
-  const goalHeight = tileSize
-  const goalPosition = getPosition(level.goalPosition, goalWidth, goalHeight)
+  const level = levels[state.levelIndex]
+  const rows = getRows(level)
+  const cols = level.tilesPerRow
+
+  const goalPosition = getPosition(level.goalPosition, tileSize, tileSize)
   const playerPosition = getPosition(state.player.position, playerSize, playerSize)
 
   return (
@@ -731,8 +733,8 @@ const App = () => {
         <div
           className="absolute p-1"
           style={{
-            width: `${goalWidth}px`,
-            height: `${goalHeight}px`,
+            width: `${tileSize}px`,
+            height: `${tileSize}px`,
             left: `${goalPosition.x}px`,
             top: `${goalPosition.y}px`,
           }}
