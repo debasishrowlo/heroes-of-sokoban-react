@@ -294,15 +294,12 @@ const levels:Level[] = [
         ],
       }
     ],
-    goalPosition: {
-      x: 6,
-      y: 1,
-    }
+    goalPosition: { x: 6, y: 1, }
   },
 ]
 
-const tileSize = 50
-const playerSize = 30
+const tileSize = 55
+const playerSize = tileSize / 1.5
 
 const v2Equal = (p1:V2, p2:V2) => {
   return p1.x === p2.x && p1.y === p2.y
