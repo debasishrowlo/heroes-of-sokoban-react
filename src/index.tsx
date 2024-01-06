@@ -821,7 +821,7 @@ const App = () => {
           )
         })}
         <div 
-          className={classnames("absolute aspect-square bg-red-600 rounded-full transition-all", {
+          className={classnames("absolute aspect-square rounded-full transition-all", {
             "bg-red-600": state.player.type === playerTypes.warrior,
             "bg-green-600": state.player.type === playerTypes.thief,
           })}
