@@ -400,8 +400,22 @@ const pauseTransitions = (duration:number) => {
   }, duration)
 }
 
+const imagesToBeLoaded = [
+  gateIcon,
+  rock1,
+  rock2,
+  rock3,
+  rock4,
+  rock5,
+]
+
 const App = () => {
   const [state, setState] = useState<State>(generateLevel(0))
+  const [loading, setLoading] = useState(true)
+
+  const level = levels[state.levelIndex]
+  const rows = getRows(level)
+  const cols = level.tilesPerRow
 
   const handleKeyDown = (e:KeyboardEvent) => {
     if (!state) { return }
@@ -605,14 +619,36 @@ const App = () => {
     setState(generateLevel(index))
   }
 
+  const preloadImages = async () => {
+    const imagePromises = imagesToBeLoaded.map(src => {
+      return new Promise((resolve, reject) => {
+        const img = new Image()
+
+        img.src = src
+        img.onload = () => { resolve(img) }
+        img.onerror = () => { reject(src) }
+      })
+    })
+
+    await Promise.all(imagePromises)
+
+    setLoading(false)
+  }
+
   const showLevelSelect = () => {
     setState(null)
   }
 
   useEffect(() => {
+    preloadImages()
+  }, [])
+
+  useEffect(() => {
     document.addEventListener("keydown", handleKeyDown)
     return () => { document.removeEventListener("keydown", handleKeyDown) }
   }, [state])
+
+  if (loading) { return null }
 
   if (state === null) {
     return (
@@ -641,10 +677,6 @@ const App = () => {
   if (state.gameStatus === gameStatuses.loading) {
     return null
   }
-
-  const level = levels[state.levelIndex]
-  const rows = getRows(level)
-  const cols = level.tilesPerRow
 
   const goalWidth = tileSize
   const goalHeight = tileSize
