@@ -336,6 +336,43 @@ const levels:Level[] = [
       y: 2,
     },
   },
+  {
+    tilemap: [
+      2, 2, 2, 2, 2, 2, 2, 2, 2,
+      2, 1, 1, 1, 1, 1, 2, 1, 2,
+      2, 1, 2, 1, 1, 1, 2, 1, 2,
+      2, 1, 1, 1, 1, 1, 1, 1, 2,
+      2, 1, 1, 1, 1, 1, 1, 1, 2,
+      2, 1, 1, 1, 1, 1, 1, 1, 2,
+      2, 1, 1, 1, 1, 1, 1, 1, 2,
+      2, 2, 2, 2, 2, 2, 2, 2, 2,
+    ],
+    tilesPerRow: 9,
+    player: {
+      type: playerTypes.wizard,
+      position: { x: 5, y: 3, },
+    },
+    rocks: [
+      { x: 3, y: 2 },
+      { x: 2, y: 3 },
+      { x: 3, y: 3 },
+    ],
+    switchGates: [
+      {
+        color: "#f7e26b",
+        position: { x: 7, y: 2 },
+        switches: [
+          { x: 2, y: 5 },
+          { x: 4, y: 5 },
+          { x: 6, y: 5 },
+        ],
+      }
+    ],
+    goalPosition: {
+      x: 7,
+      y: 1,
+    }
+  },
 ]
 
 const tileSize = 55
