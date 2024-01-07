@@ -46,11 +46,11 @@ const enum tileTypes {
 type Level = {
   tilemap: Tilemap,
   tilesPerRow: number,
-  player: {
+  players: Array<{
     type: playerTypes,
     position: V2,
-  },
-  goalPosition: V2,
+  }>,
+  goals: V2[],
   rocks?: V2[],
   switchGates?: SwitchGate[],
   playerType?: playerTypes,
@@ -70,10 +70,11 @@ type State = {
     position: V2,
     rotation: number,
   },
-  player: {
+  players: Array<{
     type: playerTypes,
     position: V2,
-  },
+  }>,
+  activePlayerIndex: number,
   margin: {
     left: number,
     top: number,
@@ -103,14 +104,13 @@ const levels:Level[] = [
       2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
     ],
     tilesPerRow: 13,
-    player: {
-      type: playerTypes.warrior,
-      position: { x: 2, y: 2, },
-    },
-    goalPosition: {
-      x: 10,
-      y: 2,
-    },
+    players: [
+      {
+        type: playerTypes.warrior,
+        position: { x: 2, y: 2, },
+      },
+    ],
+    goals: [{ x: 10, y: 2 }],
   },
   {
     tilemap: [
@@ -130,14 +130,13 @@ const levels:Level[] = [
       { x: 10, y: 1 },
       { x: 10, y: 3 },
     ],
-    player: {
-      type: playerTypes.warrior,
-      position: { x: 2, y: 2 },
-    },
-    goalPosition: {
-      x: 10,
-      y: 2,
-    }
+    players: [
+      {
+        type: playerTypes.warrior,
+        position: { x: 2, y: 2 },
+      },
+    ],
+    goals: [{ x: 10, y: 2 }],
   },
   {
     tilemap: [
@@ -157,17 +156,16 @@ const levels:Level[] = [
         ],
       }
     ],
-    player: {
-      type: playerTypes.warrior,
-      position: { x: 2, y: 2, },
-    },
+    players: [
+      {
+        type: playerTypes.warrior,
+        position: { x: 2, y: 2, },
+      },
+    ],
     rocks: [
       { x: 4, y: 2 },
     ],
-    goalPosition: {
-      x: 10,
-      y: 2,
-    },
+    goals: [{ x: 10, y: 2 }],
   },
   {
     tilemap: [
@@ -181,10 +179,12 @@ const levels:Level[] = [
       2, 2, 2, 2, 2, 2, 2, 2, 2,
     ],
     tilesPerRow: 9,
-    player: {
-      type: playerTypes.warrior,
-      position: { x: 1, y: 4, },
-    },
+    players: [
+      {
+        type: playerTypes.warrior,
+        position: { x: 1, y: 4, },
+      },
+    ],
     rocks: [
       { x: 3, y: 2 },
       { x: 2, y: 3 },
@@ -201,10 +201,7 @@ const levels:Level[] = [
         ],
       }
     ],
-    goalPosition: {
-      x: 7,
-      y: 1,
-    }
+    goals: [{ x: 7, y: 1 }],
   },
   {
     tilemap: [
@@ -224,19 +221,18 @@ const levels:Level[] = [
         ],
       }
     ],
-    player: {
-      type: playerTypes.thief,
-      position: { x: 2, y: 2, },
-    },
+    players: [
+      {
+        type: playerTypes.thief,
+        position: { x: 2, y: 2, },
+      },
+    ],
     rocks: [
       { x: 4, y: 2 },
       { x: 7, y: 1 },
       { x: 7, y: 3 },
     ],
-    goalPosition: {
-      x: 10,
-      y: 2,
-    },
+    goals: [{ x: 10, y: 2 }],
   },
   {
     tilemap: [
@@ -250,10 +246,12 @@ const levels:Level[] = [
       2, 2, 2, 2, 2, 2, 2, 2, 2,
     ],
     tilesPerRow: 9,
-    player: {
-      type: playerTypes.thief,
-      position: { x: 1, y: 4, },
-    },
+    players: [
+      {
+        type: playerTypes.thief,
+        position: { x: 1, y: 4, },
+      },
+    ],
     rocks: [
       { x: 3, y: 2 },
       { x: 2, y: 3 },
@@ -270,10 +268,7 @@ const levels:Level[] = [
         ],
       }
     ],
-    goalPosition: {
-      x: 7,
-      y: 1,
-    }
+    goals: [{ x: 7, y: 1 }],
   },
   {
     tilemap: [
@@ -286,10 +281,12 @@ const levels:Level[] = [
       2, 2, 2, 2, 2, 2, 2, 2, 2,
     ],
     tilesPerRow: 9,
-    player: {
-      type: playerTypes.thief,
-      position: { x: 5, y: 5, },
-    },
+    players: [
+      {
+        type: playerTypes.thief,
+        position: { x: 5, y: 5, },
+      },
+    ],
     rocks: [
       { x: 3, y: 5 },
     ],
@@ -302,7 +299,7 @@ const levels:Level[] = [
         ],
       }
     ],
-    goalPosition: { x: 6, y: 1, }
+    goals: [{ x: 6, y: 1 }],
   },
   {
     tilemap: [
@@ -323,18 +320,17 @@ const levels:Level[] = [
         ],
       }
     ],
-    player: {
-      type: playerTypes.wizard,
-      position: { x: 2, y: 2, },
-    },
+    players: [
+      {
+        type: playerTypes.wizard,
+        position: { x: 2, y: 2, },
+      },
+    ],
     rocks: [
       { x: 4, y: 1 },
       { x: 4, y: 2 },
     ],
-    goalPosition: {
-      x: 10,
-      y: 2,
-    },
+    goals: [{ x: 10, y: 2 }],
   },
   {
     tilemap: [
@@ -348,10 +344,12 @@ const levels:Level[] = [
       2, 2, 2, 2, 2, 2, 2, 2, 2,
     ],
     tilesPerRow: 9,
-    player: {
-      type: playerTypes.wizard,
-      position: { x: 5, y: 3, },
-    },
+    players: [
+      {
+        type: playerTypes.wizard,
+        position: { x: 5, y: 3, },
+      },
+    ],
     rocks: [
       { x: 3, y: 2 },
       { x: 2, y: 3 },
@@ -368,10 +366,7 @@ const levels:Level[] = [
         ],
       }
     ],
-    goalPosition: {
-      x: 7,
-      y: 1,
-    }
+    goals: [{ x: 7, y: 1 }],
   },
   {
     tilemap: [
@@ -384,10 +379,12 @@ const levels:Level[] = [
       2, 2, 2, 2, 2, 2, 2,
     ],
     tilesPerRow: 7,
-    player: {
-      type: playerTypes.wizard,
-      position: { x: 1, y: 1, },
-    },
+    players: [
+      {
+        type: playerTypes.wizard,
+        position: { x: 1, y: 1, },
+      },
+    ],
     rocks: [
       { x: 1, y: 3 },
       { x: 1, y: 5 },
@@ -395,10 +392,52 @@ const levels:Level[] = [
       { x: 5, y: 3 },
       { x: 5, y: 1 },
     ],
-    goalPosition: {
-      x: 3,
-      y: 1,
-    }
+    goals: [{ x: 3, y: 1 }],
+  },
+  {
+    tilemap: [
+      2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
+      2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 
+      2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 
+      2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 
+      2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
+      2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 
+      2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 
+      2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 
+      2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
+    ],
+    tilesPerRow: 13,
+    players: [
+      {
+        type: playerTypes.warrior,
+        position: { x: 2, y: 2, },
+      },
+      {
+        type: playerTypes.wizard,
+        position: { x: 2, y: 6, },
+      },
+    ],
+    rocks: [],
+    switchGates: [
+      {
+        color: "#f7e26b",
+        position: { x: 8, y: 2 },
+        switches: [
+          { x: 6, y: 6 },
+        ],
+      },
+      {
+        color: "#621fc3",
+        position: { x: 4, y: 6 },
+        switches: [
+          { x: 6, y: 2 },
+        ],
+      },
+    ],
+    goals: [
+      { x: 10, y: 2 },
+      { x: 10, y: 6 },
+    ],
   },
 ]
 
@@ -433,10 +472,8 @@ const generateLevel = (index:number):State => {
       position: { x: 0, y: 0 },
       rotation: 0,
     },
-    player: {
-      type: level.player.type || playerTypes.warrior,
-      position: { ...level.player.position },
-    },
+    players: level.players.map(player => ({ ...player })),
+    activePlayerIndex: 0,
     rocks: level.rocks ? level.rocks.map(position => ({
       position,
       img: rocks[Math.floor(Math.random() * (rocks.length - 1))],
@@ -498,8 +535,9 @@ const isGateOpen = (gateIndex:number, state:State):boolean => {
   const gate = state.switchGates[gateIndex]
 
   const allSwitchesPressed = gate.switches.every(switchPosition => {
-    const playerPosition = state.player.position
-    const isPlayerOnSwitch = v2Equal(switchPosition, playerPosition)
+    const isPlayerOnSwitch = state.players.some(player => {
+      return v2Equal(switchPosition, player.position)
+    })
 
     const isRockOnSwitch = state.rocks.some(
       rock => v2Equal(rock.position, switchPosition)
@@ -524,6 +562,8 @@ const App = () => {
   const [state, setState] = useState<State>(generateLevel(0))
   const [loading, setLoading] = useState(true)
 
+  const player = state.players[state.activePlayerIndex]
+
   const handleKeyDown = (e:KeyboardEvent) => {
     if (!state) { return }
 
@@ -534,6 +574,15 @@ const App = () => {
     if (e.key === "r" || e.key === "R") {
       pauseTransitions(150)
       loadLevel(state.levelIndex)
+      return
+    }
+
+    if (e.key === "x" || e.key === "X") {
+      const nextActivePlayerIndex = (state.activePlayerIndex + 1) % state.players.length
+      setState({
+        ...state,
+        activePlayerIndex: nextActivePlayerIndex,
+      })
       return
     }
 
@@ -555,8 +604,9 @@ const App = () => {
     const level = levels[state.levelIndex]
     const rows = getRows(level)
     const cols = level.tilesPerRow
+    const player = state.players[state.activePlayerIndex]
 
-    if (state.player.type === playerTypes.warrior) {
+    if (player.type === playerTypes.warrior) {
       let entitiesToBeMoved:Array<{
         type: entityTypes,
         index?: number,
@@ -564,7 +614,7 @@ const App = () => {
         { type: entityTypes.player },
       ]
 
-      let nextPosition = getNextTileInDirection(state.player.position, direction, rows, cols)
+      let nextPosition = getNextTileInDirection(player.position, direction, rows, cols)
       while (true) {
         const tileValue = getTileValue(level, nextPosition)
         const tileIsFloor = tileValue === tileTypes.floor
@@ -619,14 +669,18 @@ const App = () => {
         const entity = entitiesToBeMoved[i]
 
         if (entity.type === entityTypes.player) {
-          const entityPosition = state.player.position
+          const entityPosition = player.position
           const nextPosition = getNextTileInDirection(entityPosition, direction, rows, cols)
           newState = {
             ...state,
-            player: {
-              ...state.player,
-              position: { ...nextPosition },
-            }
+            players: [
+              ...state.players.slice(0, state.activePlayerIndex),
+              {
+                ...player,
+                position: { ...nextPosition },
+              },
+              ...state.players.slice(state.activePlayerIndex + 1),
+            ],
           }
         } else if (entity.type === entityTypes.rock) {
           const rock = state.rocks[entity.index]
@@ -644,8 +698,8 @@ const App = () => {
           }
         }
       }
-    } else if (state.player.type === playerTypes.thief) {
-      const nextPosition = getNextTileInDirection(state.player.position, direction, rows, cols)
+    } else if (player.type === playerTypes.thief) {
+      const nextPosition = getNextTileInDirection(player.position, direction, rows, cols)
 
       const tileValue = getTileValue(level, nextPosition)
       const tileContainsWall = tileValue === tileTypes.wall
@@ -664,7 +718,7 @@ const App = () => {
       const tileContainsEntity = tileContainsRock || tileContainsWall || tileContainsClosedGate
 
       if (!tileContainsEntity) {
-        const currentPosition = newState.player.position
+        const currentPosition = newState.players[newState.activePlayerIndex].position
 
         let oppositeDirection:directions = null
         if (direction === directions.up) {
@@ -700,16 +754,20 @@ const App = () => {
 
         newState = {
           ...newState,
-          player: {
-            ...newState.player,
-            position: nextPosition,
-          }
+          players: [
+            ...newState.players.slice(0, newState.activePlayerIndex),
+            {
+              ...newState.players[newState.activePlayerIndex],
+              position: nextPosition,
+            },
+            ...newState.players.slice(newState.activePlayerIndex + 1),
+          ],
         }
       }
-    } else if (state.player.type === playerTypes.wizard) {
+    } else if (player.type === playerTypes.wizard) {
       let rockInDirection = null
 
-      let currentPosition = { ...state.player.position }
+      let currentPosition = { ...player.position }
       let nextPositionContainsImmovableEntity = false
 
       while(!nextPositionContainsImmovableEntity) {
@@ -746,7 +804,7 @@ const App = () => {
       const rockAvailableToSwap = rockInDirection !== null
 
       if (rockAvailableToSwap) {
-        const playerPosition = state.player.position
+        const playerPosition = { ...player.position }
         const rockPosition = state.rocks[rockInDirection].position
         const rockIndex = rockInDirection
 
@@ -798,13 +856,17 @@ const App = () => {
             ...state.rocks.slice(rockIndex + 1),
           ],
           teleportBeam,
-          player: {
-            ...state.player,
-            position: { ...rockPosition },
-          }
+          players: [
+            ...state.players.slice(0, state.activePlayerIndex),
+            {
+              ...player,
+              position: { ...rockPosition },
+            },
+            ...state.players.slice(state.activePlayerIndex + 1),
+          ]
         }
       } else {
-        const nextPosition = getNextTileInDirection(state.player.position, direction, rows, cols)
+        const nextPosition = getNextTileInDirection(player.position, direction, rows, cols)
 
         const tileValue = getTileValue(level, nextPosition)
         const tileContainsWall = tileValue === tileTypes.wall
@@ -823,16 +885,27 @@ const App = () => {
         if (!tileContainsImmovableEntity) {
           newState = {
             ...state,
-            player: {
-              ...state.player,
-              position: { ...nextPosition },
-            }
+            players: [
+              ...state.players.slice(0, state.activePlayerIndex),
+              {
+                ...player,
+                position: { ...nextPosition },
+              },
+              ...state.players.slice(state.activePlayerIndex + 1),
+            ],
           }
         }
       }
     }
 
-    if (v2Equal(newState.player.position, level.goalPosition)) {
+    const goalsOccupiedByPlayers = level.goals.every((goalPosition) => {
+      const occupiedByPlayer = newState.players.some(player => v2Equal(player.position, goalPosition))
+      return occupiedByPlayer
+    })
+
+    const levelCleared = goalsOccupiedByPlayers
+
+    if (levelCleared) {
       const nextLevelIndex = state.levelIndex + 1
 
       newState.gameStatus = gameStatuses.paused
@@ -928,9 +1001,6 @@ const App = () => {
   const rows = getRows(level)
   const cols = level.tilesPerRow
 
-  const goalPosition = getPosition(level.goalPosition, tileSize, tileSize)
-  const playerPosition = getPosition(state.player.position, playerSize, playerSize)
-
   return (
     <>
       <div className="px-6 fixed top-0 right-0">
@@ -1002,17 +1072,24 @@ const App = () => {
             </div>
           )
         })}
-        <div
-          className="absolute p-1"
-          style={{
-            width: `${tileSize}px`,
-            height: `${tileSize}px`,
-            left: `${goalPosition.x}px`,
-            top: `${goalPosition.y}px`,
-          }}
-        >
-          <img src={gateIcon} />
-        </div>
+        {level.goals.map((goalPosition, index) => {
+          const mapPosition = getPosition(goalPosition, tileSize, tileSize)
+
+          return (
+            <div
+              className="absolute p-1"
+              key={`goal-${index}`}
+              style={{
+                width: `${tileSize}px`,
+                height: `${tileSize}px`,
+                left: `${mapPosition.x}px`,
+                top: `${mapPosition.y}px`,
+              }}
+            >
+              <img src={gateIcon} />
+            </div>
+          )
+        })}
         {state.switchGates.map((gate:SwitchGate, index:number) => {
           const size = tileSize
           const position = getPosition(gate.position, size, size)
@@ -1140,18 +1217,28 @@ const App = () => {
             </div>
           )
         })}
-        <div 
-          className={classnames("absolute aspect-square rounded-full transition-all", {
-            "bg-red-600": state.player.type === playerTypes.warrior,
-            "bg-green-600": state.player.type === playerTypes.thief,
-            "bg-blue-600": state.player.type === playerTypes.wizard,
-          })}
-          style={{
-            width: `${playerSize}px`,
-            left: `${playerPosition.x}px`,
-            top: `${playerPosition.y}px`,
-          }}
-        />
+        {state.players.map((player, index) => {
+          const playerPosition = getPosition(player.position, playerSize, playerSize)
+
+          const isActive = index === state.activePlayerIndex
+
+          return (
+            <div 
+              key={`player-${index}`}
+              className={classnames("absolute aspect-square rounded-full transition-all", {
+                "brightness-50": !isActive,
+                "bg-red-600": player.type === playerTypes.warrior,
+                "bg-green-600": player.type === playerTypes.thief,
+                "bg-blue-600": player.type === playerTypes.wizard,
+              })}
+              style={{
+                width: `${playerSize}px`,
+                left: `${playerPosition.x}px`,
+                top: `${playerPosition.y}px`,
+              }}
+            />
+          )
+        })}
       </div>
     </>
   )
