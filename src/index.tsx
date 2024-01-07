@@ -10,6 +10,7 @@ import rock2 from "./assets/rock2.png"
 import rock3 from "./assets/rock3.png"
 import rock4 from "./assets/rock4.png"
 import rock5 from "./assets/rock5.png"
+import tilesetImage from "./assets/tileset.png"
 
 const enum entityTypes {
   player = "player",
@@ -33,6 +34,7 @@ const enum gameStatuses {
 const enum playerTypes {
   warrior = "warrior",
   thief = "thief",
+  wizard = "wizard",
 }
 
 const enum tileTypes {
@@ -62,6 +64,12 @@ type State = {
     img: string,
   }>,
   switchGates: SwitchGate[],
+  teleportBeam: {
+    visible: boolean,
+    width: number,
+    position: V2,
+    rotation: number,
+  },
   player: {
     type: playerTypes,
     position: V2,
@@ -296,10 +304,116 @@ const levels:Level[] = [
     ],
     goalPosition: { x: 6, y: 1, }
   },
+  {
+    tilemap: [
+      2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+      2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 2,
+      2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
+      2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2,
+      2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+    ],
+    tilesPerRow: 13,
+    switchGates: [
+      {
+        color: "#f7e26b",
+        position: { x: 8, y: 2 },
+        switches: [
+          { x: 6, y: 1 },
+          { x: 6, y: 2 },
+        ],
+      }
+    ],
+    player: {
+      type: playerTypes.wizard,
+      position: { x: 2, y: 2, },
+    },
+    rocks: [
+      { x: 4, y: 1 },
+      { x: 4, y: 2 },
+    ],
+    goalPosition: {
+      x: 10,
+      y: 2,
+    },
+  },
+  {
+    tilemap: [
+      2, 2, 2, 2, 2, 2, 2, 2, 2,
+      2, 1, 1, 1, 1, 1, 2, 1, 2,
+      2, 1, 2, 1, 1, 1, 2, 1, 2,
+      2, 1, 1, 1, 1, 1, 1, 1, 2,
+      2, 1, 1, 1, 1, 1, 1, 1, 2,
+      2, 1, 1, 1, 1, 1, 1, 1, 2,
+      2, 1, 1, 1, 1, 1, 1, 1, 2,
+      2, 2, 2, 2, 2, 2, 2, 2, 2,
+    ],
+    tilesPerRow: 9,
+    player: {
+      type: playerTypes.wizard,
+      position: { x: 5, y: 3, },
+    },
+    rocks: [
+      { x: 3, y: 2 },
+      { x: 2, y: 3 },
+      { x: 3, y: 3 },
+    ],
+    switchGates: [
+      {
+        color: "#f7e26b",
+        position: { x: 7, y: 2 },
+        switches: [
+          { x: 2, y: 5 },
+          { x: 4, y: 5 },
+          { x: 6, y: 5 },
+        ],
+      }
+    ],
+    goalPosition: {
+      x: 7,
+      y: 1,
+    }
+  },
+  {
+    tilemap: [
+      2, 2, 2, 2, 2, 2, 2,
+      2, 1, 2, 1, 2, 1, 2,
+      2, 1, 2, 1, 2, 1, 2,
+      2, 1, 1, 1, 1, 1, 2,
+      2, 1, 2, 2, 2, 1, 2,
+      2, 1, 1, 1, 1, 1, 2,
+      2, 2, 2, 2, 2, 2, 2,
+    ],
+    tilesPerRow: 7,
+    player: {
+      type: playerTypes.wizard,
+      position: { x: 1, y: 1, },
+    },
+    rocks: [
+      { x: 1, y: 3 },
+      { x: 1, y: 5 },
+      { x: 3, y: 5 },
+      { x: 5, y: 3 },
+      { x: 5, y: 1 },
+    ],
+    goalPosition: {
+      x: 3,
+      y: 1,
+    }
+  },
 ]
 
 const tileSize = 55
 const playerSize = tileSize / 1.5
+
+const imagesToBeLoaded = [
+  gateIcon,
+  rock1,
+  rock2,
+  rock3,
+  rock4,
+  rock5,
+  tilesetImage,
+]
 
 const v2Equal = (p1:V2, p2:V2) => {
   return p1.x === p2.x && p1.y === p2.y
@@ -313,6 +427,12 @@ const generateLevel = (index:number):State => {
     levelIndex: index,
     gameStatus: gameStatuses.playing,
     tilesPerRow: level.tilesPerRow,
+    teleportBeam: {
+      visible: false,
+      width: 0,
+      position: { x: 0, y: 0 },
+      rotation: 0,
+    },
     player: {
       type: level.player.type || playerTypes.warrior,
       position: { ...level.player.position },
@@ -399,15 +519,6 @@ const pauseTransitions = (duration:number) => {
     document.documentElement.classList.remove("disable-transitions")
   }, duration)
 }
-
-const imagesToBeLoaded = [
-  gateIcon,
-  rock1,
-  rock2,
-  rock3,
-  rock4,
-  rock5,
-]
 
 const App = () => {
   const [state, setState] = useState<State>(generateLevel(0))
@@ -595,6 +706,130 @@ const App = () => {
           }
         }
       }
+    } else if (state.player.type === playerTypes.wizard) {
+      let rockInDirection = null
+
+      let currentPosition = { ...state.player.position }
+      let nextPositionContainsImmovableEntity = false
+
+      while(!nextPositionContainsImmovableEntity) {
+        const rockIndex = state.rocks.findIndex(rock => v2Equal(rock.position, currentPosition))
+        const tileContainsRock = rockIndex !== -1
+
+        if (tileContainsRock) {
+          rockInDirection = rockIndex
+          break
+        }
+
+        currentPosition = getNextTileInDirection(currentPosition, direction, rows, cols)
+
+        const tileValue = getTileValue(level, currentPosition)
+        const tileContainsWall = tileValue === tileTypes.wall
+
+        const gateIndex = state.switchGates.findIndex(gate => v2Equal(gate.position, currentPosition))
+        const tileContainsGate = gateIndex !== -1
+
+        let tileContainsClosedGate = false
+        if (tileContainsGate) {
+          const gateIsClosed = !isGateOpen(gateIndex, state)
+          tileContainsClosedGate = gateIsClosed
+        }
+
+        const tileContainsImmovableEntity = (
+          tileContainsWall || 
+          tileContainsClosedGate
+        )
+
+        nextPositionContainsImmovableEntity = tileContainsImmovableEntity
+      }
+
+      const rockAvailableToSwap = rockInDirection !== null
+
+      if (rockAvailableToSwap) {
+        const playerPosition = state.player.position
+        const rockPosition = state.rocks[rockInDirection].position
+        const rockIndex = rockInDirection
+
+        const teleportBeam = {
+          visible: true,
+          width: 0,
+          position: { 
+            x: 0,
+            y: 0,
+          },
+          rotation: 0,
+        }
+
+        let startPosition:V2|null = null
+        let endPosition:V2|null = null
+
+        if (playerPosition.x < rockPosition.x) {
+          startPosition = { ...playerPosition }
+          endPosition = { ...rockPosition }
+        } else {
+          startPosition = { ...rockPosition }
+          endPosition = { ...playerPosition }
+        }
+
+        teleportBeam.position = {
+          x: (startPosition.x * tileSize) + (tileSize / 2),
+          y: (startPosition.y * tileSize) + (tileSize / 2),
+        }
+        if (startPosition.y < endPosition.y) {
+          teleportBeam.rotation = 90
+        } else if (startPosition.y > endPosition.y) {
+          teleportBeam.rotation = -90
+        }
+
+        if (teleportBeam.rotation === 0) {
+          teleportBeam.width = Math.abs((endPosition.x - startPosition.x)) * tileSize
+        } else {
+          teleportBeam.width = Math.abs((endPosition.y - startPosition.y)) * tileSize
+        }
+
+        newState = {
+          ...state,
+          rocks: [
+            ...state.rocks.slice(0, rockIndex),
+            {
+              ...state.rocks[rockIndex],
+              position: { ...playerPosition },
+            },
+            ...state.rocks.slice(rockIndex + 1),
+          ],
+          teleportBeam,
+          player: {
+            ...state.player,
+            position: { ...rockPosition },
+          }
+        }
+      } else {
+        const nextPosition = getNextTileInDirection(state.player.position, direction, rows, cols)
+
+        const tileValue = getTileValue(level, nextPosition)
+        const tileContainsWall = tileValue === tileTypes.wall
+
+        const gateIndex = state.switchGates.findIndex(gate => v2Equal(gate.position, nextPosition))
+        const tileContainsGate = gateIndex !== -1
+
+        let tileContainsClosedGate = false
+        if (tileContainsGate) {
+          const gateIsClosed = !isGateOpen(gateIndex, state)
+          tileContainsClosedGate = gateIsClosed
+        }
+        
+        const tileContainsImmovableEntity = tileContainsWall || tileContainsClosedGate
+
+        if (!tileContainsImmovableEntity) {
+          newState = {
+            ...state,
+            player: {
+              ...state.player,
+              position: { ...nextPosition },
+            }
+          }
+        }
+      }
     }
 
     if (v2Equal(newState.player.position, level.goalPosition)) {
@@ -613,6 +848,17 @@ const App = () => {
     }
 
     setState(newState)
+    if (newState.teleportBeam.visible) {
+      setTimeout(() => {
+        setState({ 
+          ...newState, 
+          teleportBeam: {
+            ...newState.teleportBeam, 
+            visible: false,
+          },
+        })
+      }, 150)
+    }
   }
 
   const loadLevel = (index:number) => {
@@ -652,10 +898,10 @@ const App = () => {
 
   if (state === null) {
     return (
-      <div className="container h-screen mx-auto flex items-center justify-center">
+      <div className="container h-screen mx-auto flex items-center justify-center max-w-2xl">
         <div>
           <h1 className="text-20 text-white">Select Level</h1>
-          <div className="mt-4 flex gap-6">
+          <div className="mt-4 flex flex-wrap gap-6">
             {levels.map((level, index) => {
               return (
                 <button 
@@ -710,19 +956,45 @@ const App = () => {
                 let bgColor = "bg-transparent"
                 let borderColor = "border-transparent"
 
+                const tileset = {
+                  size: 256,
+                  tileSize: 32,
+                }
+
+                const scale = tileSize / tileset.tileSize
+
+                const bgTileSize = tileset.tileSize * scale
+                const bgSize = scale * tileset.size
+
+                let textureX = 0
+                let textureY = 0
+
                 const tileValue = getTileValue(level, { x: col, y: row })
                 if (tileValue === tileTypes.floor) {
                   bgColor = "bg-gray-100"
                   borderColor = "border-gray-300"
+                  textureX = 3
+                  textureY = 2
                 } else if (tileValue === tileTypes.wall) {
                   bgColor = "bg-gray-700"
                   borderColor = "border-gray-700"
+                  textureX = 3
+                  textureY = 0
                 }
+
+                const backgroundX = textureX * bgTileSize * -1
+                const backgroundY = textureY * bgTileSize * -1
+                const backgroundPosition = `${backgroundX}px ${backgroundY}px`
 
                 return (
                   <div 
-                    className={`relative flex items-center justify-center border ${borderColor} ${bgColor} aspect-square`}
-                    style={{ width: `${tileSize}px` }}
+                    className={`relative flex items-center justify-center ${borderColor} ${bgColor} aspect-square`}
+                    style={{ 
+                      width: `${tileSize}px`,
+                      backgroundImage: `url(${tilesetImage})`,
+                      backgroundSize: `${bgSize}px ${bgSize}px`,
+                      backgroundPosition,
+                    }}
                     key={`col-${index}`}
                   />
                 )
@@ -836,6 +1108,20 @@ const App = () => {
             </div>
           )
         })}
+        <div 
+          className={classnames("absolute border-t border-b border-blue-600/80 transition-opacity", {
+            "opacity-0": !state.teleportBeam.visible,
+            "opacity-100": state.teleportBeam.visible,
+          })}
+          style={{
+            borderTopWidth: 12,
+            left: state.teleportBeam.position.x,
+            top: state.teleportBeam.position.y,
+            transformOrigin: "left center",
+            transform: `translate(0%, -50%) rotate(${state.teleportBeam.rotation}deg)`,
+            width: `${state.teleportBeam.width}px`,
+          }}
+        ></div>
         {state.rocks.map((rock, index) => {
           const position = getPosition(rock.position, tileSize, tileSize)
 
@@ -858,6 +1144,7 @@ const App = () => {
           className={classnames("absolute aspect-square rounded-full transition-all", {
             "bg-red-600": state.player.type === playerTypes.warrior,
             "bg-green-600": state.player.type === playerTypes.thief,
+            "bg-blue-600": state.player.type === playerTypes.wizard,
           })}
           style={{
             width: `${playerSize}px`,
