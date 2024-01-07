@@ -834,10 +834,10 @@ const App = () => {
 
   if (state === null) {
     return (
-      <div className="container h-screen mx-auto flex items-center justify-center">
+      <div className="container h-screen mx-auto flex items-center justify-center max-w-2xl">
         <div>
           <h1 className="text-20 text-white">Select Level</h1>
-          <div className="mt-4 flex gap-6">
+          <div className="mt-4 flex flex-wrap gap-6">
             {levels.map((level, index) => {
               return (
                 <button 
