@@ -34,6 +34,7 @@ const enum gameStatuses {
 const enum playerTypes {
   warrior = "warrior",
   thief = "thief",
+  wizard = "wizard",
 }
 
 const enum tileTypes {
@@ -297,10 +298,52 @@ const levels:Level[] = [
     ],
     goalPosition: { x: 6, y: 1, }
   },
+  {
+    tilemap: [
+      2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+      2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 2,
+      2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
+      2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2,
+      2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+    ],
+    tilesPerRow: 13,
+    switchGates: [
+      {
+        color: "#f7e26b",
+        position: { x: 8, y: 2 },
+        switches: [
+          { x: 6, y: 1 },
+          { x: 6, y: 2 },
+        ],
+      }
+    ],
+    player: {
+      type: playerTypes.wizard,
+      position: { x: 2, y: 2, },
+    },
+    rocks: [
+      { x: 4, y: 1 },
+      { x: 4, y: 2 },
+    ],
+    goalPosition: {
+      x: 10,
+      y: 2,
+    },
+  },
 ]
 
 const tileSize = 55
 const playerSize = tileSize / 1.5
+
+const imagesToBeLoaded = [
+  gateIcon,
+  rock1,
+  rock2,
+  rock3,
+  rock4,
+  rock5,
+  tilesetImage,
+]
 
 const v2Equal = (p1:V2, p2:V2) => {
   return p1.x === p2.x && p1.y === p2.y
@@ -400,16 +443,6 @@ const pauseTransitions = (duration:number) => {
     document.documentElement.classList.remove("disable-transitions")
   }, duration)
 }
-
-const imagesToBeLoaded = [
-  gateIcon,
-  rock1,
-  rock2,
-  rock3,
-  rock4,
-  rock5,
-  tilesetImage,
-]
 
 const App = () => {
   const [state, setState] = useState<State>(generateLevel(0))
@@ -594,6 +627,92 @@ const App = () => {
           player: {
             ...newState.player,
             position: nextPosition,
+          }
+        }
+      }
+    } else if (state.player.type === playerTypes.wizard) {
+      let nextPosition = getNextTileInDirection(state.player.position, direction, rows, cols)
+
+      let rockInDirection = null
+
+      let currentPosition = { ...state.player.position }
+      let nextPositionContainsImmovableEntity = false
+
+      while(!nextPositionContainsImmovableEntity) {
+        const rockIndex = state.rocks.findIndex(rock => v2Equal(rock.position, currentPosition))
+        const tileContainsRock = rockIndex !== -1
+
+        if (tileContainsRock) {
+          rockInDirection = rockIndex
+          break
+        }
+
+        currentPosition = getNextTileInDirection(currentPosition, direction, rows, cols)
+
+        const tileValue = getTileValue(level, currentPosition)
+        const tileContainsWall = tileValue === tileTypes.wall
+
+        const gateIndex = state.switchGates.findIndex(gate => v2Equal(gate.position, currentPosition))
+        const tileContainsGate = gateIndex !== -1
+
+        let tileContainsClosedGate = false
+        if (tileContainsGate) {
+          const gateIsClosed = !isGateOpen(gateIndex, state)
+          tileContainsClosedGate = gateIsClosed
+        }
+
+        const tileContainsImmovableEntity = (
+          tileContainsWall || 
+          tileContainsClosedGate
+        )
+
+        nextPositionContainsImmovableEntity = tileContainsImmovableEntity
+      }
+
+      const rockAvailableToSwap = rockInDirection !== null
+
+      if (rockAvailableToSwap) {
+        const playerPosition = state.player.position
+        const rockPosition = state.rocks[rockInDirection].position
+        const rockIndex = rockInDirection
+
+        newState = {
+          ...state,
+          rocks: [
+            ...state.rocks.slice(0, rockIndex),
+            {
+              ...state.rocks[rockIndex],
+              position: { ...playerPosition },
+            },
+            ...state.rocks.slice(rockIndex + 1),
+          ],
+          player: {
+            ...state.player,
+            position: { ...rockPosition },
+          }
+        }
+      } else {
+        const tileValue = getTileValue(level, nextPosition)
+        const tileContainsWall = tileValue === tileTypes.wall
+
+        const gateIndex = state.switchGates.findIndex(gate => v2Equal(gate.position, nextPosition))
+        const tileContainsGate = gateIndex !== -1
+
+        let tileContainsClosedGate = false
+        if (tileContainsGate) {
+          const gateIsClosed = !isGateOpen(gateIndex, state)
+          tileContainsClosedGate = gateIsClosed
+        }
+        
+        const tileContainsImmovableEntity = tileContainsWall || tileContainsClosedGate
+
+        if (!tileContainsImmovableEntity) {
+          newState = {
+            ...state,
+            player: {
+              ...state.player,
+              position: { ...nextPosition },
+            }
           }
         }
       }
@@ -886,6 +1005,7 @@ const App = () => {
           className={classnames("absolute aspect-square rounded-full transition-all", {
             "bg-red-600": state.player.type === playerTypes.warrior,
             "bg-green-600": state.player.type === playerTypes.thief,
+            "bg-blue-600": state.player.type === playerTypes.wizard,
           })}
           style={{
             width: `${playerSize}px`,
