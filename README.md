@@ -8,6 +8,6 @@
   ![@debasishrowlo13162 #30NitesOfCode](https://www.codedex.io/api/petStatus?user=debasishrowlo13162)
 
 Assets used:
-[Stone Vectors by Vecteezy]("https://www.vecteezy.com/free-vector/stone")
-[Medieval icons created by Freepik - Flaticon]("https://www.flaticon.com/free-icons/medieval")
-[Dungeon Tileset]("https://opengameart.org/content/dungeon-tileset-4")
+[Stone Vectors by Vecteezy](https://www.vecteezy.com/free-vector/stone)
+[Medieval icons created by Freepik - Flaticon](https://www.flaticon.com/free-icons/medieval)
+[Dungeon Tileset](https://opengameart.org/content/dungeon-tileset-4)

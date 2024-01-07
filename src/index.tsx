@@ -10,6 +10,7 @@ import rock2 from "./assets/rock2.png"
 import rock3 from "./assets/rock3.png"
 import rock4 from "./assets/rock4.png"
 import rock5 from "./assets/rock5.png"
+import tilesetImage from "./assets/tileset.png"
 
 const enum entityTypes {
   player = "player",
@@ -407,6 +408,7 @@ const imagesToBeLoaded = [
   rock3,
   rock4,
   rock5,
+  tilesetImage,
 ]
 
 const App = () => {
@@ -710,19 +712,45 @@ const App = () => {
                 let bgColor = "bg-transparent"
                 let borderColor = "border-transparent"
 
+                const tileset = {
+                  size: 256,
+                  tileSize: 32,
+                }
+
+                const scale = tileSize / tileset.tileSize
+
+                const bgTileSize = tileset.tileSize * scale
+                const bgSize = scale * tileset.size
+
+                let textureX = 0
+                let textureY = 0
+
                 const tileValue = getTileValue(level, { x: col, y: row })
                 if (tileValue === tileTypes.floor) {
                   bgColor = "bg-gray-100"
                   borderColor = "border-gray-300"
+                  textureX = 3
+                  textureY = 2
                 } else if (tileValue === tileTypes.wall) {
                   bgColor = "bg-gray-700"
                   borderColor = "border-gray-700"
+                  textureX = 3
+                  textureY = 0
                 }
+
+                const backgroundX = textureX * bgTileSize * -1
+                const backgroundY = textureY * bgTileSize * -1
+                const backgroundPosition = `${backgroundX}px ${backgroundY}px`
 
                 return (
                   <div 
-                    className={`relative flex items-center justify-center border ${borderColor} ${bgColor} aspect-square`}
-                    style={{ width: `${tileSize}px` }}
+                    className={`relative flex items-center justify-center ${borderColor} ${bgColor} aspect-square`}
+                    style={{ 
+                      width: `${tileSize}px`,
+                      backgroundImage: `url(${tilesetImage})`,
+                      backgroundSize: `${bgSize}px ${bgSize}px`,
+                      backgroundPosition,
+                    }}
                     key={`col-${index}`}
                   />
                 )
