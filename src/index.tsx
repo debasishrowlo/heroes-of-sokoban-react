@@ -64,6 +64,12 @@ type State = {
     img: string,
   }>,
   switchGates: SwitchGate[],
+  teleportBeam: {
+    visible: boolean,
+    width: number,
+    position: V2,
+    rotation: number,
+  },
   player: {
     type: playerTypes,
     position: V2,
@@ -357,6 +363,12 @@ const generateLevel = (index:number):State => {
     levelIndex: index,
     gameStatus: gameStatuses.playing,
     tilesPerRow: level.tilesPerRow,
+    teleportBeam: {
+      visible: false,
+      width: 0,
+      position: { x: 0, y: 0 },
+      rotation: 0,
+    },
     player: {
       type: level.player.type || playerTypes.warrior,
       position: { ...level.player.position },
@@ -674,6 +686,43 @@ const App = () => {
         const rockPosition = state.rocks[rockInDirection].position
         const rockIndex = rockInDirection
 
+        const teleportBeam = {
+          visible: true,
+          width: 0,
+          position: { 
+            x: 0,
+            y: 0,
+          },
+          rotation: 0,
+        }
+
+        let startPosition:V2|null = null
+        let endPosition:V2|null = null
+
+        if (playerPosition.x < rockPosition.x) {
+          startPosition = { ...playerPosition }
+          endPosition = { ...rockPosition }
+        } else {
+          startPosition = { ...rockPosition }
+          endPosition = { ...playerPosition }
+        }
+
+        teleportBeam.position = {
+          x: (startPosition.x * tileSize) + (tileSize / 2),
+          y: (startPosition.y * tileSize) + (tileSize / 2),
+        }
+        if (startPosition.y < endPosition.y) {
+          teleportBeam.rotation = 90
+        } else if (startPosition.y > endPosition.y) {
+          teleportBeam.rotation = -90
+        }
+
+        if (teleportBeam.rotation === 0) {
+          teleportBeam.width = Math.abs((endPosition.x - startPosition.x)) * tileSize
+        } else {
+          teleportBeam.width = Math.abs((endPosition.y - startPosition.y)) * tileSize
+        }
+
         newState = {
           ...state,
           rocks: [
@@ -684,6 +733,7 @@ const App = () => {
             },
             ...state.rocks.slice(rockIndex + 1),
           ],
+          teleportBeam,
           player: {
             ...state.player,
             position: { ...rockPosition },
@@ -734,6 +784,17 @@ const App = () => {
     }
 
     setState(newState)
+    if (newState.teleportBeam.visible) {
+      setTimeout(() => {
+        setState({ 
+          ...newState, 
+          teleportBeam: {
+            ...newState.teleportBeam, 
+            visible: false,
+          },
+        })
+      }, 150)
+    }
   }
 
   const loadLevel = (index:number) => {
@@ -983,6 +1044,20 @@ const App = () => {
             </div>
           )
         })}
+        <div 
+          className={classnames("absolute border-t border-b border-blue-600/80 transition-opacity", {
+            "opacity-0": !state.teleportBeam.visible,
+            "opacity-100": state.teleportBeam.visible,
+          })}
+          style={{
+            borderTopWidth: 12,
+            left: state.teleportBeam.position.x,
+            top: state.teleportBeam.position.y,
+            transformOrigin: "left center",
+            transform: `translate(0%, -50%) rotate(${state.teleportBeam.rotation}deg)`,
+            width: `${state.teleportBeam.width}px`,
+          }}
+        ></div>
         {state.rocks.map((rock, index) => {
           const position = getPosition(rock.position, tileSize, tileSize)
 
