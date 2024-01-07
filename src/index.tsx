@@ -53,7 +53,6 @@ type Level = {
   goals: V2[],
   rocks?: V2[],
   switchGates?: SwitchGate[],
-  playerType?: playerTypes,
 }
 
 type State = {
