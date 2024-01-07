@@ -631,8 +631,6 @@ const App = () => {
         }
       }
     } else if (state.player.type === playerTypes.wizard) {
-      let nextPosition = getNextTileInDirection(state.player.position, direction, rows, cols)
-
       let rockInDirection = null
 
       let currentPosition = { ...state.player.position }
@@ -692,6 +690,8 @@ const App = () => {
           }
         }
       } else {
+        const nextPosition = getNextTileInDirection(state.player.position, direction, rows, cols)
+
         const tileValue = getTileValue(level, nextPosition)
         const tileContainsWall = tileValue === tileTypes.wall
 
