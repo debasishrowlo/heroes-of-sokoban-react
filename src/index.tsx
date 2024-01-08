@@ -405,7 +405,7 @@ const levels:Level[] = [
     goals: [{ x: 3, y: 1 }],
   },
   {
-    popupMessage: "Press X to switch heroes",
+    popupMessage: `Press "X" to switch heroes`,
     tilemap: [
       2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
       2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 
@@ -1008,7 +1008,7 @@ const App = () => {
               return (
                 <button 
                   type="button" 
-                  className="w-20 aspect-square bg-gray-200 hover:bg-gray-300 text-24 font-bold text-gray-600 rounded-6" 
+                  className="w-20 aspect-square bg-gray-200 hover:bg-gray-300 text-24 font-bold text-gray-900 rounded-6" 
                   key={index}
                   onClick={() => loadLevel(index)}
                 >
@@ -1270,9 +1270,9 @@ const App = () => {
         })}
       </div>
       {state.popup.visible && (
-        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-10 bg-white rounded-lg">
+        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-10 py-14 border-2 border-white bg-gray-900 text-white rounded-lg shadow-md">
           <p className="text-24 text-center">{state.popup.message}</p>
-          <p className="mt-6 text-18 text-center">Press "X" to Continue</p>
+          <p className="mt-10 text-18 text-center">Press "X" to Continue</p>
         </div>
       )}
     </>

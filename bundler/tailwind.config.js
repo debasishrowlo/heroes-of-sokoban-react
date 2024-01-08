@@ -40,7 +40,7 @@ module.exports = {
     extend: {
       borderRadius: generateBorderRadius(24),
       fontFamily: {
-        'sans': ['Ubuntu', ...defaultTheme.fontFamily.sans],
+        'sans': ["\"Press Start 2P\"", ...defaultTheme.fontFamily.sans],
       },
       fontSize: generateFontSize(12, 100),
       spacing: {
