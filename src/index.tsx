@@ -1008,7 +1008,7 @@ const App = () => {
               return (
                 <button 
                   type="button" 
-                  className="w-20 aspect-square bg-gray-200 hover:bg-gray-300 text-24 font-bold text-gray-900 rounded-6" 
+                  className="w-20 aspect-square bg-gray-200 hover:bg-gray-400 text-24 font-bold text-gray-800 rounded-6" 
                   key={index}
                   onClick={() => loadLevel(index)}
                 >
