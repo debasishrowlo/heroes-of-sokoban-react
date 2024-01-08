@@ -561,8 +561,6 @@ const App = () => {
   const [state, setState] = useState<State>(generateLevel(0))
   const [loading, setLoading] = useState(true)
 
-  const player = state.players[state.activePlayerIndex]
-
   const handleKeyDown = (e:KeyboardEvent) => {
     if (!state) { return }
 
@@ -616,7 +614,6 @@ const App = () => {
       let nextPosition = getNextTileInDirection(player.position, direction, rows, cols)
       while (true) {
         const tileValue = getTileValue(level, nextPosition)
-        const tileIsFloor = tileValue === tileTypes.floor
 
         const rockIndex = state.rocks.findIndex(rock => v2Equal(rock.position, nextPosition))
         const tileContainsRock = rockIndex !== -1
@@ -630,19 +627,22 @@ const App = () => {
           tileContainsClosedGate = gateIsClosed
         }
 
+        const tileContainsWall = tileValue === tileTypes.wall
+
         const tileIsEmpty = (
-          tileIsFloor && 
+          !tileContainsWall &&
           !tileContainsRock && 
           !tileContainsClosedGate
         )
 
-        const tileContainsWall = tileValue === tileTypes.wall
-
         if (tileIsEmpty) {
           break
-        } 
+        }
 
-        const tileContainsImmovableEntity = tileContainsWall || tileContainsClosedGate
+        const tileContainsImmovableEntity = (
+          tileContainsWall || 
+          tileContainsClosedGate
+        )
         
         if (tileContainsImmovableEntity) {
           entitiesToBeMoved = []
@@ -907,8 +907,8 @@ const App = () => {
     if (levelCleared) {
       const nextLevelIndex = state.levelIndex + 1
 
-      newState.gameStatus = gameStatuses.paused
       if (nextLevelIndex < levels.length) {
+        newState.gameStatus = gameStatuses.paused
         setTimeout(() => {
           newState.gameStatus = gameStatuses.loading
           pauseTransitions(150)
