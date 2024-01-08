@@ -44,6 +44,7 @@ const enum tileTypes {
 }
 
 type Level = {
+  popupMessage?: string,
   tilemap: Tilemap,
   tilesPerRow: number,
   players: Array<{
@@ -58,6 +59,10 @@ type Level = {
 type State = {
   levelIndex: number,
   gameStatus: gameStatuses,
+  popup: {
+    visible: boolean,
+    message: string,
+  },
   rocks: Array<{
     position: V2,
     img: string,
@@ -95,6 +100,7 @@ type V2 = {
 
 const levels:Level[] = [
   {
+    popupMessage: "Use W, A, S, D or Arrow Keys to move",
     tilemap: [
       2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
       2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
@@ -138,6 +144,7 @@ const levels:Level[] = [
     goals: [{ x: 10, y: 2 }],
   },
   {
+    popupMessage: "Level 3 popup message",
     tilemap: [
       2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
       2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2,
@@ -465,6 +472,10 @@ const generateLevel = (index:number):State => {
     levelIndex: index,
     gameStatus: gameStatuses.playing,
     tilesPerRow: level.tilesPerRow,
+    popup: {
+      visible: level.popupMessage ? true : false,
+      message: level.popupMessage || "",
+    },
     teleportBeam: {
       visible: false,
       width: 0,
@@ -565,7 +576,21 @@ const App = () => {
     if (!state) { return }
 
     if (state.gameStatus !== gameStatuses.playing) {
-      return 
+      return
+    }
+
+    if (state.popup.visible) {
+      if (e.key === "x" || e.key === "X") {
+        setState({
+          ...state,
+          popup: {
+            ...state.popup,
+            visible: false,
+          },
+        })
+      }
+
+      return
     }
 
     if (e.key === "r" || e.key === "R") {
@@ -1239,6 +1264,12 @@ const App = () => {
           )
         })}
       </div>
+      {state.popup.visible && (
+        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-10 bg-white rounded-lg">
+          <p className="text-24 text-center">{state.popup.message}</p>
+          <p className="mt-6 text-18 text-center">Press "X" to Continue</p>
+        </div>
+      )}
     </>
   )
 }
