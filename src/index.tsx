@@ -118,6 +118,7 @@ const levels:Level[] = [
     goals: [{ x: 10, y: 2 }],
   },
   {
+    popupMessage: "Red warrior pushes blocks",
     tilemap: [
       2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
       2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2,
@@ -144,7 +145,7 @@ const levels:Level[] = [
     goals: [{ x: 10, y: 2 }],
   },
   {
-    popupMessage: "Level 3 popup message",
+    popupMessage: "Hold down Switches to open doors",
     tilemap: [
       2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
       2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2,
@@ -174,6 +175,7 @@ const levels:Level[] = [
     goals: [{ x: 10, y: 2 }],
   },
   {
+    popupMessage: "Press multiple switches at once",
     tilemap: [
       2, 2, 2, 2, 2, 2, 2, 2, 2,
       2, 1, 1, 1, 1, 1, 2, 1, 2,
@@ -210,6 +212,7 @@ const levels:Level[] = [
     goals: [{ x: 7, y: 1 }],
   },
   {
+    popupMessage: "Green thief pulls blocks",
     tilemap: [
       2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
       2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2,
@@ -308,6 +311,7 @@ const levels:Level[] = [
     goals: [{ x: 6, y: 1 }],
   },
   {
+    popupMessage: "Blue Wizard teleports to blocks",
     tilemap: [
       2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
       2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 2,
@@ -401,6 +405,7 @@ const levels:Level[] = [
     goals: [{ x: 3, y: 1 }],
   },
   {
+    popupMessage: "Press X to switch heroes",
     tilemap: [
       2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
       2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 
