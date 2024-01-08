@@ -963,6 +963,21 @@ const App = () => {
     }
   }
 
+  const handleResize = () => {
+    if (state && state.gameStatus === gameStatuses.playing) {
+      const level = levels[state.levelIndex]
+      const rows = getRows(level)
+      const cols = level.tilesPerRow
+      setState({
+        ...state,
+        margin: {
+          left: (window.innerWidth - (cols * tileSize)) / 2,
+          top: (window.innerHeight - (rows * tileSize)) / 2,
+        },
+      })
+    }
+  }
+
   const loadLevel = (index:number) => {
     setState(generateLevel(index))
   }
@@ -993,7 +1008,12 @@ const App = () => {
 
   useEffect(() => {
     document.addEventListener("keydown", handleKeyDown)
-    return () => { document.removeEventListener("keydown", handleKeyDown) }
+    window.addEventListener("resize", handleResize)
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown)
+      window.removeEventListener("resize", handleResize)
+    }
   }, [state])
 
   if (loading) { return null }
