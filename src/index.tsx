@@ -100,7 +100,7 @@ type V2 = {
 
 const levels:Level[] = [
   {
-    popupMessage: "Use W, A, S, D or Arrow Keys to move",
+    popupMessage: `Use W, A, S, D or arrow keys to move`,
     tilemap: [
       2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
       2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
@@ -175,7 +175,7 @@ const levels:Level[] = [
     goals: [{ x: 10, y: 2 }],
   },
   {
-    popupMessage: "Press multiple switches at once",
+    popupMessage: `Press "R" to reset a level`,
     tilemap: [
       2, 2, 2, 2, 2, 2, 2, 2, 2,
       2, 1, 1, 1, 1, 1, 2, 1, 2,
@@ -641,7 +641,7 @@ const App = () => {
 
     if (upKeyPressed) { direction = directions.up }
     else if (leftKeyPressed) { direction = directions.left }
-    else if (downKeyPressed) { direction = directions.down } 
+    else if (downKeyPressed) { direction = directions.down }
     else if (rightKeyPressed) { direction = directions.right }
 
     if (!direction) { return }
@@ -1329,7 +1329,7 @@ const App = () => {
       </div>
       {state.popup.visible && (
         <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-10 py-14 border-2 border-white bg-gray-900 text-white rounded-lg shadow-md">
-          <p className="text-24 text-center">{state.popup.message}</p>
+          <p className="text-24 text-center" dangerouslySetInnerHTML={{ __html: state.popup.message }}></p>
           <p className="mt-10 text-18 text-center">Press "X" to Continue</p>
         </div>
       )}
