@@ -658,11 +658,7 @@ const generateLevel = (index:number):State => {
 }
 
 const getEntityOnTile = (state:State, level:Level, position:V2):Entity => {
-  let entityOnTile:Entity|null = null
-
-  const rockIndex = state.rocks.findIndex(
-    rock => v2Equal(rock.position, position)
-  )
+  const rockIndex = state.rocks.findIndex(rock => v2Equal(rock.position, position))
   if (rockIndex !== -1) {
     return {
       type: entityTypes.rock,
@@ -790,6 +786,14 @@ const pauseTransitions = (duration:number) => {
   }, duration)
 }
 
+const tileContainsImmovableEntity = (state:State, entity:Entity):boolean => {
+  const tileContainsWall = entity.type === entityTypes.wall
+  const tileContainsGate = entity.type === entityTypes.gate
+  const tileContainsClosedGate = tileContainsGate && !isGateOpen(state, entity.index)
+  const tileContainsImmovableEntity = tileContainsWall || tileContainsClosedGate
+  return tileContainsImmovableEntity
+}
+
 const xKeyPressed = (key:KeyboardEvent["key"]) => {
   return key === "x" || key === "X"
 }
@@ -881,15 +885,9 @@ const App = () => {
         const entityOnTile = getEntityOnTile(newState, level, nextPosition)
 
         const tileIsEmpty = entityOnTile === null
-
         if (tileIsEmpty) { break }
 
-        const tileContainsWall = entityOnTile.type === entityTypes.wall
-        const tileContainsGate = entityOnTile.type === entityTypes.gate
-        const tileContainsClosedGate = tileContainsGate && !isGateOpen(newState, entityOnTile.index)
-        const tileContainsImmovableEntity = tileContainsWall || tileContainsClosedGate
-        
-        if (tileContainsImmovableEntity) {
+        if (tileContainsImmovableEntity(newState, entityOnTile)) {
           entitiesToBeMoved = []
           break
         } 
@@ -897,7 +895,6 @@ const App = () => {
         const tileContainsRock = entityOnTile.type === entityTypes.rock
         const tileContainsHero = entityOnTile.type === entityTypes.hero
         const tileContainsMovableEntity = tileContainsRock || tileContainsHero
-        
         if (tileContainsMovableEntity) {
           entitiesToBeMoved = [...entitiesToBeMoved, entityOnTile]
         }
@@ -908,11 +905,14 @@ const App = () => {
       for (let i = 0; i < entitiesToBeMoved.length; i++) {
         const entity = entitiesToBeMoved[i]
 
-        if (entity.type === entityTypes.hero) {
+        const tileContainsHero = entity.type === entityTypes.hero
+        const tileContainsRock = entity.type === entityTypes.rock
+
+        if (tileContainsHero) {
           const hero = newState.heroes[entity.index]
           const nextPosition = getNextTileInDirection(hero.position, direction, rows, cols)
           newState = moveHero(newState, entity.index, nextPosition)
-        } else if (entity.type === entityTypes.rock) {
+        } else if (tileContainsRock) {
           const rock = newState.rocks[entity.index]
           const nextPosition = getNextTileInDirection(rock.position, direction, rows, cols)
           newState = moveRock(newState, entity.index, nextPosition)
@@ -926,7 +926,6 @@ const App = () => {
       const tileContainsGate = entityOnTile && entityOnTile.type === entityTypes.gate
       const tileContainsOpenGate = tileContainsGate && isGateOpen(newState, entityOnTile.index)
       const tileCanBeOccupied = tileIsEmpty || tileContainsOpenGate
-
       if (tileCanBeOccupied) {
         const currentPosition = newState.heroes[newState.activeHeroIndex].position
 
@@ -945,13 +944,11 @@ const App = () => {
         const entityOnOppositeTile = getEntityOnTile(newState, level, oppositePosition)
 
         const oppositeTileContainsRock = entityOnOppositeTile && entityOnOppositeTile.type === entityTypes.rock
-
         if (oppositeTileContainsRock) {
           newState = moveRock(newState, entityOnOppositeTile.index, currentPosition)
         }
 
         const oppositeTileContainsHero = entityOnOppositeTile && entityOnOppositeTile.type === entityTypes.hero
-
         if (oppositeTileContainsHero) {
           newState = moveHero(newState, entityOnOppositeTile.index, currentPosition)
         }
@@ -959,51 +956,39 @@ const App = () => {
         newState = moveHero(newState, newState.activeHeroIndex, nextPosition)
       }
     } else if (hero.type === heroTypes.wizard) {
-      let rockInDirection = null
-      let heroInDirection = null
+      let entity:Entity = null
 
       let currentPosition = getNextTileInDirection(hero.position, direction, rows, cols)
       while(true) {
         const entityOnTile = getEntityOnTile(newState, level, currentPosition)
 
-        const tileContainsWall = entityOnTile && entityOnTile.type === entityTypes.wall
-        const tileContainsGate = entityOnTile && entityOnTile.type === entityTypes.gate
-        const tileContainsClosedGate = tileContainsGate && !isGateOpen(newState, entityOnTile.index)
-        const tileContainsImmovableEntity = (
-          tileContainsWall || 
-          tileContainsClosedGate
-        )
-        if (tileContainsImmovableEntity) { break }
+        if (tileContainsImmovableEntity(newState, entityOnTile)) { break }
 
-        const tileContainsRock = entityOnTile && entityOnTile.type === entityTypes.rock
-        if (tileContainsRock) {
-          rockInDirection = entityOnTile.index
-          break
-        }
-
-        const tileContainsHero = entityOnTile && entityOnTile.type === entityTypes.hero
-        if (tileContainsHero) {
-          heroInDirection = entityOnTile.index
+        if (entityOnTile) {
+          entity = entityOnTile
           break
         }
 
         currentPosition = getNextTileInDirection(currentPosition, direction, rows, cols)
       }
+      const entityToSwap = entity
 
-      const heroAvailableToSwap = heroInDirection !== null
-      const rockAvailableToSwap = rockInDirection !== null
+      const tileContainsRock = entityToSwap.type === entityTypes.rock
+      const tileContainsHero = entityToSwap.type === entityTypes.hero
 
-      if (rockAvailableToSwap || heroAvailableToSwap) {
+      if (entityToSwap !== null) {
         let startPosition:V2|null = null
         let endPosition:V2|null = null
 
-        if (rockAvailableToSwap) {
+        if (tileContainsRock) {
+          const heroIndex = newState.activeHeroIndex
           const heroPosition = { ...hero.position }
-          const rockIndex = rockInDirection
+
+          const rockIndex = entityToSwap.index
           const rockPosition = newState.rocks[rockIndex].position
 
           newState = moveRock(newState, rockIndex, heroPosition)
-          newState = moveHero(newState, newState.activeHeroIndex, rockPosition)
+          newState = moveHero(newState, heroIndex, rockPosition)
 
           if (heroPosition.x < rockPosition.x) {
             startPosition = { ...heroPosition }
@@ -1012,11 +997,11 @@ const App = () => {
             startPosition = { ...rockPosition }
             endPosition = { ...heroPosition }
           }
-        } else if (heroAvailableToSwap) {
+        } else if (tileContainsHero) {
           const wizardIndex = newState.activeHeroIndex
           const wizardPosition = { ...hero.position }
 
-          const heroIndex = heroInDirection
+          const heroIndex = entityToSwap.index
           const heroPosition = newState.heroes[heroIndex].position
 
           newState = moveHero(newState, wizardIndex, heroPosition)
@@ -1065,11 +1050,7 @@ const App = () => {
         const nextPosition = getNextTileInDirection(hero.position, direction, rows, cols)
         const entityOnTile = getEntityOnTile(newState, level, nextPosition)
 
-        const tileContainsWall = entityOnTile && entityOnTile.type === entityTypes.wall
-        const tileContainsGate = entityOnTile && entityOnTile.type === entityTypes.gate
-        const tileContainsClosedGate = tileContainsGate && !isGateOpen(newState, entityOnTile.index)
-        const tileContainsImmovableEntity = tileContainsWall || tileContainsClosedGate
-        if (!tileContainsImmovableEntity) {
+        if (!tileContainsImmovableEntity(newState, entityOnTile)) {
           newState = moveHero(newState, newState.activeHeroIndex, nextPosition)
         }
       }
@@ -1211,7 +1192,6 @@ const App = () => {
       </div>
     )
   }
-
 
   const level = levels[state.levelIndex]
   const rows = getRows(level)
