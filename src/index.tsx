@@ -481,6 +481,49 @@ const levels:Level[] = [
       { x: 9, y: 1 },
     ],
   },
+  {
+    tilemap: [
+      2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+      2, 1, 1, 1, 1, 2, 1, 1, 2, 1, 2,
+      2, 1, 1, 2, 1, 1, 1, 1, 1, 1, 2,
+      2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 2,
+      2, 1, 1, 2, 1, 2, 2, 1, 2, 2, 2,
+      2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2,
+      2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+    ],
+    tilesPerRow: 11,
+    heroes: [
+      {
+        type: heroTypes.warrior,
+        position: { x: 1, y: 1, },
+      },
+      {
+        type: heroTypes.thief,
+        position: { x: 1, y: 5, },
+      },
+    ],
+    rocks: [
+      { x: 3, y: 1 },
+      { x: 7, y: 1 },
+      { x: 7, y: 2 },
+      { x: 7, y: 3 },
+      { x: 9, y: 3 },
+      { x: 6, y: 5 },
+    ],
+    switchGates: [
+      {
+        color: "#f7e26b",
+        position: { x: 7, y: 4 },
+        switches: [
+          { x: 9, y: 1 },
+        ],
+      },
+    ],
+    goals: [
+      { x: 8, y: 5 },
+      { x: 9, y: 5 },
+    ],
+  },
 ]
 
 const tileSize = 55
