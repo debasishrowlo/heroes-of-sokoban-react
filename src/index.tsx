@@ -755,6 +755,34 @@ const isGateOpen = (state:State, gateIndex:number):boolean => {
   return isOpen
 }
 
+const moveHero = (state:State, heroIndex:number, position:V2):State => {
+  return {
+    ...state,
+    heroes: [
+      ...state.heroes.slice(0, heroIndex),
+      {
+        ...state.heroes[heroIndex],
+        position: { ...position },
+      },
+      ...state.heroes.slice(heroIndex + 1),
+    ],
+  }
+}
+
+const moveRock = (state:State, rockIndex:number, position:V2):State => {
+  return {
+    ...state,
+    rocks: [
+      ...state.rocks.slice(0, rockIndex),
+      {
+        ...state.rocks[rockIndex],
+        position: { ...position },
+      },
+      ...state.rocks.slice(rockIndex + 1),
+    ]
+  }
+}
+
 const pauseTransitions = (duration:number) => {
   document.documentElement.classList.add("disable-transitions")
   setTimeout(() => {
@@ -835,22 +863,22 @@ const App = () => {
 
     if (!direction) { return }
 
-    const level = levels[state.levelIndex]
+    const level = levels[newState.levelIndex]
     const rows = getRows(level)
     const cols = level.tilesPerRow
-    const hero = state.heroes[state.activeHeroIndex]
+    const hero = newState.heroes[state.activeHeroIndex]
 
     if (hero.type === heroTypes.warrior) {
       let entitiesToBeMoved:Array<Entity> = [
         {
           type: entityTypes.hero,
-          index: state.activeHeroIndex,
+          index: newState.activeHeroIndex,
         },
       ]
 
       let nextPosition = getNextTileInDirection(hero.position, direction, rows, cols)
       while (true) {
-        const entityOnTile = getEntityOnTile(state, level, nextPosition)
+        const entityOnTile = getEntityOnTile(newState, level, nextPosition)
 
         const tileIsEmpty = entityOnTile === null
 
@@ -858,7 +886,7 @@ const App = () => {
 
         const tileContainsWall = entityOnTile.type === entityTypes.wall
         const tileContainsGate = entityOnTile.type === entityTypes.gate
-        const tileContainsClosedGate = tileContainsGate && !isGateOpen(state, entityOnTile.index)
+        const tileContainsClosedGate = tileContainsGate && !isGateOpen(newState, entityOnTile.index)
         const tileContainsImmovableEntity = tileContainsWall || tileContainsClosedGate
         
         if (tileContainsImmovableEntity) {
@@ -881,47 +909,26 @@ const App = () => {
         const entity = entitiesToBeMoved[i]
 
         if (entity.type === entityTypes.hero) {
-          const hero = state.heroes[entity.index]
-          const entityPosition = hero.position
-          const nextPosition = getNextTileInDirection(entityPosition, direction, rows, cols)
-          newState = {
-            ...newState,
-            heroes: [
-              ...newState.heroes.slice(0, entity.index),
-              {
-                ...newState.heroes[entity.index],
-                position: { ...nextPosition },
-              },
-              ...newState.heroes.slice(entity.index + 1),
-            ],
-          }
+          const hero = newState.heroes[entity.index]
+          const nextPosition = getNextTileInDirection(hero.position, direction, rows, cols)
+          newState = moveHero(newState, entity.index, nextPosition)
         } else if (entity.type === entityTypes.rock) {
-          const rock = state.rocks[entity.index]
+          const rock = newState.rocks[entity.index]
           const nextPosition = getNextTileInDirection(rock.position, direction, rows, cols)
-          newState = {
-            ...newState,
-            rocks: [
-              ...newState.rocks.slice(0, entity.index),
-              {
-                ...newState.rocks[entity.index],
-                position: { ...nextPosition },
-              },
-              ...newState.rocks.slice(entity.index + 1),
-            ]
-          }
+          newState = moveRock(newState, entity.index, nextPosition)
         }
       }
     } else if (hero.type === heroTypes.thief) {
       const nextPosition = getNextTileInDirection(hero.position, direction, rows, cols)
-      const entityOnTile = getEntityOnTile(state, level, nextPosition)
+      const entityOnTile = getEntityOnTile(newState, level, nextPosition)
 
       const tileIsEmpty = entityOnTile === null
       const tileContainsGate = entityOnTile && entityOnTile.type === entityTypes.gate
-      const tileContainsOpenGate = tileContainsGate && isGateOpen(state, entityOnTile.index)
+      const tileContainsOpenGate = tileContainsGate && isGateOpen(newState, entityOnTile.index)
       const tileCanBeOccupied = tileIsEmpty || tileContainsOpenGate
 
       if (tileCanBeOccupied) {
-        const currentPosition = state.heroes[state.activeHeroIndex].position
+        const currentPosition = newState.heroes[newState.activeHeroIndex].position
 
         let oppositeDirection:directions = null
         if (direction === directions.up) {
@@ -934,54 +941,22 @@ const App = () => {
           oppositeDirection = directions.left
         }
 
-        const oppositePosition = getNextTileInDirection(
-          currentPosition, oppositeDirection, rows, cols
-        )
-        const entityOnOppositeTile = getEntityOnTile(state, level, oppositePosition)
+        const oppositePosition = getNextTileInDirection(currentPosition, oppositeDirection, rows, cols)
+        const entityOnOppositeTile = getEntityOnTile(newState, level, oppositePosition)
 
         const oppositeTileContainsRock = entityOnOppositeTile && entityOnOppositeTile.type === entityTypes.rock
 
         if (oppositeTileContainsRock) {
-          newState = {
-            ...newState,
-            rocks: [
-              ...newState.rocks.slice(0, entityOnOppositeTile.index),
-              {
-                ...newState.rocks[entityOnOppositeTile.index],
-                position: currentPosition,
-              },
-              ...newState.rocks.slice(entityOnOppositeTile.index + 1),
-            ]
-          }
+          newState = moveRock(newState, entityOnOppositeTile.index, currentPosition)
         }
 
         const oppositeTileContainsHero = entityOnOppositeTile && entityOnOppositeTile.type === entityTypes.hero
 
         if (oppositeTileContainsHero) {
-          newState = {
-            ...newState,
-            heroes: [
-              ...newState.heroes.slice(0, entityOnOppositeTile.index),
-              {
-                ...newState.heroes[entityOnOppositeTile.index],
-                position: currentPosition,
-              },
-              ...newState.heroes.slice(entityOnOppositeTile.index + 1),
-            ]
-          }
+          newState = moveHero(newState, entityOnOppositeTile.index, currentPosition)
         }
 
-        newState = {
-          ...newState,
-          heroes: [
-            ...newState.heroes.slice(0, newState.activeHeroIndex),
-            {
-              ...newState.heroes[newState.activeHeroIndex],
-              position: nextPosition,
-            },
-            ...newState.heroes.slice(newState.activeHeroIndex + 1),
-          ],
-        }
+        newState = moveHero(newState, newState.activeHeroIndex, nextPosition)
       }
     } else if (hero.type === heroTypes.wizard) {
       let rockInDirection = null
@@ -989,11 +964,11 @@ const App = () => {
 
       let currentPosition = getNextTileInDirection(hero.position, direction, rows, cols)
       while(true) {
-        const entityOnTile = getEntityOnTile(state, level, currentPosition)
+        const entityOnTile = getEntityOnTile(newState, level, currentPosition)
 
         const tileContainsWall = entityOnTile && entityOnTile.type === entityTypes.wall
         const tileContainsGate = entityOnTile && entityOnTile.type === entityTypes.gate
-        const tileContainsClosedGate = tileContainsGate && !isGateOpen(state, entityOnTile.index)
+        const tileContainsClosedGate = tileContainsGate && !isGateOpen(newState, entityOnTile.index)
         const tileContainsImmovableEntity = (
           tileContainsWall || 
           tileContainsClosedGate
@@ -1025,7 +1000,10 @@ const App = () => {
         if (rockAvailableToSwap) {
           const heroPosition = { ...hero.position }
           const rockIndex = rockInDirection
-          const rockPosition = state.rocks[rockIndex].position
+          const rockPosition = newState.rocks[rockIndex].position
+
+          newState = moveRock(newState, rockIndex, heroPosition)
+          newState = moveHero(newState, newState.activeHeroIndex, rockPosition)
 
           if (heroPosition.x < rockPosition.x) {
             startPosition = { ...heroPosition }
@@ -1034,32 +1012,15 @@ const App = () => {
             startPosition = { ...rockPosition }
             endPosition = { ...heroPosition }
           }
-
-          newState = {
-            ...state,
-            rocks: [
-              ...state.rocks.slice(0, rockIndex),
-              {
-                ...state.rocks[rockIndex],
-                position: { ...heroPosition },
-              },
-              ...state.rocks.slice(rockIndex + 1),
-            ],
-            heroes: [
-              ...state.heroes.slice(0, state.activeHeroIndex),
-              {
-                ...hero,
-                position: { ...rockPosition },
-              },
-              ...state.heroes.slice(state.activeHeroIndex + 1),
-            ]
-          }
         } else if (heroAvailableToSwap) {
+          const wizardIndex = newState.activeHeroIndex
           const wizardPosition = { ...hero.position }
-          const wizardIndex = state.activeHeroIndex
 
           const heroIndex = heroInDirection
-          const heroPosition = state.heroes[heroIndex].position
+          const heroPosition = newState.heroes[heroIndex].position
+
+          newState = moveHero(newState, wizardIndex, heroPosition)
+          newState = moveHero(newState, heroIndex, wizardPosition)
 
           if (wizardPosition.x < heroPosition.x) {
             startPosition = { ...wizardPosition }
@@ -1067,30 +1028,6 @@ const App = () => {
           } else {
             startPosition = { ...heroPosition }
             endPosition = { ...wizardPosition }
-          }
-
-          newState = {
-            ...newState,
-            heroes: [
-              ...newState.heroes.slice(0, wizardIndex),
-              {
-                ...newState.heroes[wizardIndex],
-                position: { ...heroPosition },
-              },
-              ...newState.heroes.slice(wizardIndex + 1),
-            ],
-          }
-
-          newState = {
-            ...newState,
-            heroes: [
-              ...newState.heroes.slice(0, heroIndex),
-              {
-                ...newState.heroes[heroIndex],
-                position: { ...wizardPosition },
-              },
-              ...newState.heroes.slice(heroIndex + 1),
-            ],
           }
         }
 
@@ -1126,24 +1063,14 @@ const App = () => {
         }
       } else {
         const nextPosition = getNextTileInDirection(hero.position, direction, rows, cols)
-        const entityOnTile = getEntityOnTile(state, level, nextPosition)
+        const entityOnTile = getEntityOnTile(newState, level, nextPosition)
 
         const tileContainsWall = entityOnTile && entityOnTile.type === entityTypes.wall
         const tileContainsGate = entityOnTile && entityOnTile.type === entityTypes.gate
-        const tileContainsClosedGate = tileContainsGate && !isGateOpen(state, entityOnTile.index)
+        const tileContainsClosedGate = tileContainsGate && !isGateOpen(newState, entityOnTile.index)
         const tileContainsImmovableEntity = tileContainsWall || tileContainsClosedGate
         if (!tileContainsImmovableEntity) {
-          newState = {
-            ...state,
-            heroes: [
-              ...state.heroes.slice(0, state.activeHeroIndex),
-              {
-                ...hero,
-                position: { ...nextPosition },
-              },
-              ...state.heroes.slice(state.activeHeroIndex + 1),
-            ],
-          }
+          newState = moveHero(newState, newState.activeHeroIndex, nextPosition)
         }
       }
     }
@@ -1156,7 +1083,7 @@ const App = () => {
     })
     const levelCleared = allGoalsOccupiedByHeroes
     if (levelCleared) {
-      const nextLevelIndex = state.levelIndex + 1
+      const nextLevelIndex = newState.levelIndex + 1
       const nextLevelAvailable = nextLevelIndex < levels.length
 
       if (nextLevelAvailable) {
@@ -1164,7 +1091,7 @@ const App = () => {
         setTimeout(() => {
           newState.gameStatus = gameStatuses.loading
           pauseTransitions(150)
-          loadLevel(state.levelIndex + 1)
+          loadLevel(nextLevelIndex)
         }, 500)
       } else {
         allLevelsCleared = true
