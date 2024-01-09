@@ -39,6 +39,11 @@ const enum heroTypes {
   wizard = "wizard",
 }
 
+const enum switchGateColors {
+  yellow = "yellow",
+  purple = "purple",
+}
+
 const enum tileTypes {
   empty = 0,
   floor = 1,
@@ -74,6 +79,8 @@ type Level = {
   rocks?: V2[],
   switchGates?: SwitchGate[],
 }
+
+type MovableEntity = HeroEntity | RockEntity
 
 type RockEntity = {
   type: entityTypes.rock,
@@ -111,7 +118,7 @@ type State = {
 
 type SwitchGate = {
   position: V2,
-  color: string,
+  color: switchGateColors,
   switches: V2[],
 }
 
@@ -184,7 +191,7 @@ const levels:Level[] = [
     tilesPerRow: 13,
     switchGates: [
       {
-        color: "#f7e26b",
+        color: switchGateColors.yellow,
         position: { x: 8, y: 3 },
         switches: [
           { x: 6, y: 2 },
@@ -228,7 +235,7 @@ const levels:Level[] = [
     ],
     switchGates: [
       {
-        color: "#f7e26b",
+        color: switchGateColors.yellow,
         position: { x: 7, y: 2 },
         switches: [
           { x: 2, y: 5 },
@@ -251,7 +258,7 @@ const levels:Level[] = [
     tilesPerRow: 13,
     switchGates: [
       {
-        color: "#f7e26b",
+        color: switchGateColors.yellow,
         position: { x: 8, y: 3 },
         switches: [
           { x: 6, y: 2 },
@@ -296,7 +303,7 @@ const levels:Level[] = [
     ],
     switchGates: [
       {
-        color: "#f7e26b",
+        color: switchGateColors.yellow,
         position: { x: 7, y: 2 },
         switches: [
           { x: 2, y: 5 },
@@ -329,7 +336,7 @@ const levels:Level[] = [
     ],
     switchGates: [
       {
-        color: "#f7e26b",
+        color: switchGateColors.yellow,
         position: { x: 7, y: 2 },
         switches: [
           { x: 5, y: 3 },
@@ -350,7 +357,7 @@ const levels:Level[] = [
     tilesPerRow: 13,
     switchGates: [
       {
-        color: "#f7e26b",
+        color: switchGateColors.yellow,
         position: { x: 8, y: 2 },
         switches: [
           { x: 6, y: 1 },
@@ -395,7 +402,7 @@ const levels:Level[] = [
     ],
     switchGates: [
       {
-        color: "#f7e26b",
+        color: switchGateColors.yellow,
         position: { x: 7, y: 2 },
         switches: [
           { x: 2, y: 5 },
@@ -459,14 +466,14 @@ const levels:Level[] = [
     rocks: [],
     switchGates: [
       {
-        color: "#f7e26b",
+        color: switchGateColors.yellow,
         position: { x: 8, y: 2 },
         switches: [
           { x: 6, y: 6 },
         ],
       },
       {
-        color: "#621fc3",
+        color: switchGateColors.purple,
         position: { x: 4, y: 6 },
         switches: [
           { x: 6, y: 2 },
@@ -540,7 +547,7 @@ const levels:Level[] = [
     ],
     switchGates: [
       {
-        color: "#f7e26b",
+        color: switchGateColors.yellow,
         position: { x: 7, y: 4 },
         switches: [
           { x: 9, y: 1 },
@@ -581,14 +588,14 @@ const levels:Level[] = [
     ],
     switchGates: [
       {
-        color: "#f7e26b",
+        color: switchGateColors.yellow,
         position: { x: 8, y: 5 },
         switches: [
           { x: 6, y: 2 },
         ],
       },
       {
-        color: "#621fc3",
+        color: switchGateColors.purple,
         position: { x: 9, y: 5 },
         switches: [
           { x: 6, y: 8 },
@@ -657,7 +664,7 @@ const generateLevel = (index:number):State => {
   return state
 }
 
-const getEntityOnTile = (state:State, level:Level, position:V2):Entity => {
+const getEntityOnTile = (state:State, level:Level, position:V2):Entity|null => {
   const rockIndex = state.rocks.findIndex(rock => v2Equal(rock.position, position))
   if (rockIndex !== -1) {
     return {
@@ -794,6 +801,12 @@ const tileContainsImmovableEntity = (state:State, entity:Entity):boolean => {
   return tileContainsImmovableEntity
 }
 
+const tileContainsMovableEntity = (entity:Entity):boolean => {
+  const tileContainsRock = entity.type === entityTypes.rock
+  const tileContainsHero = entity.type === entityTypes.hero
+  return tileContainsRock || tileContainsHero
+}
+
 const xKeyPressed = (key:KeyboardEvent["key"]) => {
   return key === "x" || key === "X"
 }
@@ -870,7 +883,7 @@ const App = () => {
     const level = levels[newState.levelIndex]
     const rows = getRows(level)
     const cols = level.tilesPerRow
-    const hero = newState.heroes[state.activeHeroIndex]
+    const hero = newState.heroes[newState.activeHeroIndex]
 
     if (hero.type === heroTypes.warrior) {
       let entitiesToBeMoved:Array<Entity> = [
@@ -892,10 +905,7 @@ const App = () => {
           break
         } 
 
-        const tileContainsRock = entityOnTile.type === entityTypes.rock
-        const tileContainsHero = entityOnTile.type === entityTypes.hero
-        const tileContainsMovableEntity = tileContainsRock || tileContainsHero
-        if (tileContainsMovableEntity) {
+        if (tileContainsMovableEntity(entityOnTile)) {
           entitiesToBeMoved = [...entitiesToBeMoved, entityOnTile]
         }
 
@@ -956,29 +966,31 @@ const App = () => {
         newState = moveHero(newState, newState.activeHeroIndex, nextPosition)
       }
     } else if (hero.type === heroTypes.wizard) {
-      let entity:Entity = null
+      let entity:MovableEntity = null
 
       let currentPosition = getNextTileInDirection(hero.position, direction, rows, cols)
       while(true) {
         const entityOnTile = getEntityOnTile(newState, level, currentPosition)
 
-        if (tileContainsImmovableEntity(newState, entityOnTile)) { break }
-
         if (entityOnTile) {
-          entity = entityOnTile
-          break
+          if (tileContainsImmovableEntity(newState, entityOnTile)) { break }
+
+          if (tileContainsMovableEntity(entityOnTile)) {
+            entity = entityOnTile as MovableEntity
+            break
+          }
         }
 
         currentPosition = getNextTileInDirection(currentPosition, direction, rows, cols)
       }
       const entityToSwap = entity
 
-      const tileContainsRock = entityToSwap.type === entityTypes.rock
-      const tileContainsHero = entityToSwap.type === entityTypes.hero
-
       if (entityToSwap !== null) {
         let startPosition:V2|null = null
         let endPosition:V2|null = null
+
+        const tileContainsRock = entityToSwap.type === entityTypes.rock
+        const tileContainsHero = entityToSwap.type === entityTypes.hero
 
         if (tileContainsRock) {
           const heroIndex = newState.activeHeroIndex
@@ -1050,7 +1062,9 @@ const App = () => {
         const nextPosition = getNextTileInDirection(hero.position, direction, rows, cols)
         const entityOnTile = getEntityOnTile(newState, level, nextPosition)
 
-        if (!tileContainsImmovableEntity(newState, entityOnTile)) {
+        const tileIsEmpty = entityOnTile === null
+
+        if (tileIsEmpty || !tileContainsImmovableEntity(newState, entityOnTile)) {
           newState = moveHero(newState, newState.activeHeroIndex, nextPosition)
         }
       }
@@ -1293,6 +1307,13 @@ const App = () => {
           const isOpen = isGateOpen(state, index)
           const highlightSize = size / 5
 
+          let gateColor:string = null
+          if (gate.color === switchGateColors.yellow) {
+            gateColor = "#f7e26b"
+          } else if (gate.color === switchGateColors.purple) {
+            gateColor = "#621fc3"
+          }
+
           return (
             <div key={`gate-${index}`}>
               <div
@@ -1301,7 +1322,7 @@ const App = () => {
                   width: `${size}px`,
                   left: `${position.x}px`,
                   top: `${position.y}px`,
-                  backgroundColor: isOpen ? "transparent" : gate.color,
+                  backgroundColor: isOpen ? "transparent" : gateColor,
                 }}
               >
                 {[
@@ -1351,7 +1372,7 @@ const App = () => {
                       })} 
                       key={`closed-highlight-${index}`}
                       style={{
-                        backgroundColor: gate.color,
+                        backgroundColor: gateColor,
                         width: `${highlightSize}px`,
                         left: `${left}px`,
                         top: `${top}px`,
@@ -1372,7 +1393,7 @@ const App = () => {
                       width: `${size}px`,
                       left: `${position.x}px`,
                       top: `${position.y}px`,
-                      backgroundColor: gate.color,
+                      backgroundColor: gateColor,
                     }}
                   >
                   </div>
