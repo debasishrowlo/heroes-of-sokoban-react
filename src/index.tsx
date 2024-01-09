@@ -728,9 +728,12 @@ const App = () => {
     if (hero.type === heroTypes.warrior) {
       let entitiesToBeMoved:Array<{
         type: entityTypes,
-        index?: number,
+        index: number,
       }> = [
-        { type: entityTypes.hero },
+        {
+          type: entityTypes.hero,
+          index: state.activeHeroIndex,
+        },
       ]
 
       let nextPosition = getNextTileInDirection(hero.position, direction, rows, cols)
@@ -751,9 +754,13 @@ const App = () => {
 
         const tileContainsWall = tileValue === tileTypes.wall
 
+        const heroIndex = state.heroes.findIndex(hero => v2Equal(hero.position, nextPosition))
+        const tileContainsHero = heroIndex !== -1
+
         const tileIsEmpty = (
           !tileContainsWall &&
           !tileContainsRock && 
+          !tileContainsHero && 
           !tileContainsClosedGate
         )
 
@@ -771,16 +778,26 @@ const App = () => {
           break
         } 
 
-        const tileContainsMovableEntity = tileContainsRock
+        const tileContainsMovableEntity = tileContainsRock || tileContainsHero
         
         if (tileContainsMovableEntity) {
-          entitiesToBeMoved = [
-            ...entitiesToBeMoved,
-            {
-              type: entityTypes.rock,
-              index: rockIndex,
-            }
-          ]
+          if (tileContainsRock) {
+            entitiesToBeMoved = [
+              ...entitiesToBeMoved,
+              {
+                type: entityTypes.rock,
+                index: rockIndex,
+              }
+            ]
+          } else if (tileContainsHero) {
+            entitiesToBeMoved = [
+              ...entitiesToBeMoved,
+              {
+                type: entityTypes.hero,
+                index: heroIndex,
+              },
+            ]
+          }
         }
 
         nextPosition = getNextTileInDirection(nextPosition, direction, rows, cols)
@@ -790,17 +807,18 @@ const App = () => {
         const entity = entitiesToBeMoved[i]
 
         if (entity.type === entityTypes.hero) {
+          const hero = state.heroes[entity.index]
           const entityPosition = hero.position
           const nextPosition = getNextTileInDirection(entityPosition, direction, rows, cols)
           newState = {
-            ...state,
+            ...newState,
             heroes: [
-              ...state.heroes.slice(0, state.activeHeroIndex),
+              ...newState.heroes.slice(0, entity.index),
               {
-                ...hero,
+                ...newState.heroes[entity.index],
                 position: { ...nextPosition },
               },
-              ...state.heroes.slice(state.activeHeroIndex + 1),
+              ...newState.heroes.slice(entity.index + 1),
             ],
           }
         } else if (entity.type === entityTypes.rock) {
