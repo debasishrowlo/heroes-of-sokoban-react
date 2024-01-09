@@ -853,8 +853,10 @@ const App = () => {
       }
 
       const tileContainsRock = state.rocks.find(rock => v2Equal(rock.position, nextPosition))
+      const tileContainsHero = state.heroes.some(hero => v2Equal(hero.position, nextPosition))
 
       const tileCanBeOccupied = (
+        !tileContainsHero && 
         !tileContainsRock && 
         !tileContainsWall &&
         !tileContainsClosedGate
