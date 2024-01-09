@@ -43,8 +43,6 @@ const enum tileTypes {
   wall = 2,
 }
 
-type Entities = PlayerEntity | RockEntity
-
 type Level = {
   popupMessage?: string,
   tilemap: Tilemap,
@@ -56,16 +54,6 @@ type Level = {
   goals: V2[],
   rocks?: V2[],
   switchGates?: SwitchGate[],
-}
-
-type PlayerEntity = {
-  type: entityTypes.player,
-  index: number,
-}
-
-type RockEntity = {
-  type: entityTypes.rock,
-  index: number,
 }
 
 type State = {
@@ -664,11 +652,11 @@ const App = () => {
     const player = state.players[state.activePlayerIndex]
 
     if (player.type === playerTypes.warrior) {
-      let entitiesToBeMoved:Array<Entities> = [
-        {
-          type: entityTypes.player,
-          index: state.activePlayerIndex,
-        },
+      let entitiesToBeMoved:Array<{
+        type: entityTypes,
+        index?: number,
+      }> = [
+        { type: entityTypes.player },
       ]
 
       let nextPosition = getNextTileInDirection(player.position, direction, rows, cols)
@@ -733,12 +721,12 @@ const App = () => {
           newState = {
             ...state,
             players: [
-              ...state.players.slice(0, entity.index),
+              ...state.players.slice(0, state.activePlayerIndex),
               {
                 ...player,
                 position: { ...nextPosition },
               },
-              ...state.players.slice(entity.index + 1),
+              ...state.players.slice(state.activePlayerIndex + 1),
             ],
           }
         } else if (entity.type === entityTypes.rock) {
