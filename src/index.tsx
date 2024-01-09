@@ -793,9 +793,13 @@ const App = () => {
 
       const tileContainsRock = state.rocks.find(rock => v2Equal(rock.position, nextPosition))
 
-      const tileContainsEntity = tileContainsRock || tileContainsWall || tileContainsClosedGate
+      const tileCanBeOccupied = (
+        !tileContainsRock && 
+        !tileContainsWall &&
+        !tileContainsClosedGate
+      )
 
-      if (!tileContainsEntity) {
+      if (tileCanBeOccupied) {
         const currentPosition = newState.heroes[newState.activeHeroIndex].position
 
         let oppositeDirection:directions = null
@@ -826,6 +830,23 @@ const App = () => {
                 position: currentPosition,
               },
               ...newState.rocks.slice(rockIndex + 1),
+            ]
+          }
+        }
+
+        const heroIndex = state.heroes.findIndex(hero => v2Equal(hero.position, oppositePosition))
+        const oppositeTileContainsHero = heroIndex !== -1
+
+        if (oppositeTileContainsHero) {
+          newState = {
+            ...newState,
+            heroes: [
+              ...newState.heroes.slice(0, heroIndex),
+              {
+                ...newState.heroes[heroIndex],
+                position: currentPosition,
+              },
+              ...newState.heroes.slice(heroIndex + 1),
             ]
           }
         }
