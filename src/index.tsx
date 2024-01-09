@@ -573,19 +573,35 @@ const pauseTransitions = (duration:number) => {
   }, duration)
 }
 
+const xKeyPressed = (key:KeyboardEvent["key"]) => {
+  return key === "x" || key === "X"
+}
+
 const App = () => {
   const [state, setState] = useState<State>(generateLevel(0))
   const [loading, setLoading] = useState(true)
 
   const handleKeyDown = (e:KeyboardEvent) => {
+    const key = e.key
+
     if (!state) { return }
 
-    if (state.gameStatus !== gameStatuses.playing) {
+    if (
+      state.gameStatus === gameStatuses.loading ||
+      state.gameStatus === gameStatuses.paused
+    ) {
+      return
+    }
+
+    if (state.gameStatus === gameStatuses.win) {
+      if (xKeyPressed(key)) {
+        showLevelSelect()
+      }
       return
     }
 
     if (state.popup.visible) {
-      if (e.key === "x" || e.key === "X") {
+      if (xKeyPressed(key)) {
         setState({
           ...state,
           popup: {
@@ -598,13 +614,15 @@ const App = () => {
       return
     }
 
-    if (e.key === "r" || e.key === "R") {
+    const rKeyPressed = key === "r" || key === "R"
+
+    if (rKeyPressed) {
       pauseTransitions(150)
       loadLevel(state.levelIndex)
       return
     }
 
-    if (e.key === "x" || e.key === "X") {
+    if (xKeyPressed(key)) {
       const nextActivePlayerIndex = (state.activePlayerIndex + 1) % state.players.length
       setState({
         ...state,
@@ -616,15 +634,15 @@ const App = () => {
     let newState = { ...state }
     let direction:directions|null = null
 
-    if (e.key === "ArrowUp" || e.key === "w" || e.key === "W") {
-      direction = directions.up
-    } else if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") {
-      direction = directions.left
-    } else if (e.key === "ArrowDown" || e.key === "s" || e.key === "S") {
-      direction = directions.down
-    } else if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") {
-      direction = directions.right
-    }
+    const upKeyPressed = (key === "ArrowUp" || key === "w" || key === "W")
+    const downKeyPressed = (key === "ArrowDown" || key === "s" || key === "S")
+    const leftKeyPressed = (key === "ArrowLeft" || key === "a" || key === "A")
+    const rightKeyPressed = (key === "ArrowRight" || key === "d" || key === "D")
+
+    if (upKeyPressed) { direction = directions.up }
+    else if (leftKeyPressed) { direction = directions.left }
+    else if (downKeyPressed) { direction = directions.down } 
+    else if (rightKeyPressed) { direction = directions.right }
 
     if (!direction) { return }
 
@@ -933,11 +951,13 @@ const App = () => {
     })
 
     const levelCleared = goalsOccupiedByPlayers
+    let allLevelsCleared = false
 
     if (levelCleared) {
       const nextLevelIndex = state.levelIndex + 1
+      const nextLevelAvailable = nextLevelIndex < levels.length
 
-      if (nextLevelIndex < levels.length) {
+      if (nextLevelAvailable) {
         newState.gameStatus = gameStatuses.paused
         setTimeout(() => {
           newState.gameStatus = gameStatuses.loading
@@ -945,15 +965,21 @@ const App = () => {
           loadLevel(state.levelIndex + 1)
         }, 500)
       } else {
-        alert("You win!!")
+        allLevelsCleared = true
       }
+    }
+
+    if (allLevelsCleared) {
+      setTimeout(() => {
+        setState({ ...newState, gameStatus: gameStatuses.win })
+      }, 500)
     }
 
     setState(newState)
     if (newState.teleportBeam.visible) {
       setTimeout(() => {
-        setState({ 
-          ...newState, 
+        setState({
+          ...newState,
           teleportBeam: {
             ...newState.teleportBeam, 
             visible: false,
@@ -1045,6 +1071,18 @@ const App = () => {
   if (state.gameStatus === gameStatuses.loading) {
     return null
   }
+
+  if (state.gameStatus === gameStatuses.win) {
+    return (
+      <div className="fixed w-full h-full flex items-center justify-center">
+        <div className="px-20 py-20 flex-col border border-white rounded-xl">
+          <p className="text-center text-28 text-white">Thank you for playing</p>
+          <p className="mt-14 text-center text-20 text-white">Press "x" to continue</p>
+        </div>
+      </div>
+    )
+  }
+
 
   const level = levels[state.levelIndex]
   const rows = getRows(level)
@@ -1234,7 +1272,7 @@ const App = () => {
             </div>
           )
         })}
-        <div 
+        <div
           className={classnames("absolute border-t border-b border-blue-600/80 transition-opacity", {
             "opacity-0": !state.teleportBeam.visible,
             "opacity-100": state.teleportBeam.visible,
