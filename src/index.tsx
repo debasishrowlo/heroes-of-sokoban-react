@@ -844,21 +844,12 @@ const App = () => {
       }
     } else if (hero.type === heroTypes.wizard) {
       let rockInDirection = null
+      let heroInDirection = null
 
-      let currentPosition = { ...hero.position }
+      let currentPosition = getNextTileInDirection(hero.position, direction, rows, cols)
       let nextPositionContainsImmovableEntity = false
 
-      while(!nextPositionContainsImmovableEntity) {
-        const rockIndex = state.rocks.findIndex(rock => v2Equal(rock.position, currentPosition))
-        const tileContainsRock = rockIndex !== -1
-
-        if (tileContainsRock) {
-          rockInDirection = rockIndex
-          break
-        }
-
-        currentPosition = getNextTileInDirection(currentPosition, direction, rows, cols)
-
+      while(true) {
         const tileValue = getTileValue(level, currentPosition)
         const tileContainsWall = tileValue === tileTypes.wall
 
@@ -877,34 +868,117 @@ const App = () => {
         )
 
         nextPositionContainsImmovableEntity = tileContainsImmovableEntity
+
+        if (nextPositionContainsImmovableEntity) {
+          break
+        }
+
+        const rockIndex = state.rocks.findIndex(rock => v2Equal(rock.position, currentPosition))
+        const tileContainsRock = rockIndex !== -1
+
+        if (tileContainsRock) {
+          rockInDirection = rockIndex
+          break
+        }
+
+        const heroIndex = state.heroes.findIndex(hero => v2Equal(hero.position, currentPosition))
+        const tileContainsHero = heroIndex !== -1
+
+        if (tileContainsHero) {
+          heroInDirection = heroIndex
+          break
+        }
+
+        currentPosition = getNextTileInDirection(currentPosition, direction, rows, cols)
       }
 
+      const heroAvailableToSwap = heroInDirection !== null
       const rockAvailableToSwap = rockInDirection !== null
 
-      if (rockAvailableToSwap) {
-        const heroPosition = { ...hero.position }
-        const rockPosition = state.rocks[rockInDirection].position
-        const rockIndex = rockInDirection
+      if (rockAvailableToSwap || heroAvailableToSwap) {
+        let startPosition:V2|null = null
+        let endPosition:V2|null = null
+
+        if (rockAvailableToSwap) {
+          const heroPosition = { ...hero.position }
+          const rockIndex = rockInDirection
+          const rockPosition = state.rocks[rockIndex].position
+
+          if (heroPosition.x < rockPosition.x) {
+            startPosition = { ...heroPosition }
+            endPosition = { ...rockPosition }
+          } else {
+            startPosition = { ...rockPosition }
+            endPosition = { ...heroPosition }
+          }
+
+          newState = {
+            ...state,
+            rocks: [
+              ...state.rocks.slice(0, rockIndex),
+              {
+                ...state.rocks[rockIndex],
+                position: { ...heroPosition },
+              },
+              ...state.rocks.slice(rockIndex + 1),
+            ],
+            heroes: [
+              ...state.heroes.slice(0, state.activeHeroIndex),
+              {
+                ...hero,
+                position: { ...rockPosition },
+              },
+              ...state.heroes.slice(state.activeHeroIndex + 1),
+            ]
+          }
+        } else if (heroAvailableToSwap) {
+          const wizardPosition = { ...hero.position }
+          const wizardIndex = state.activeHeroIndex
+
+          const heroIndex = heroInDirection
+          const heroPosition = state.heroes[heroIndex].position
+
+          if (wizardPosition.x < heroPosition.x) {
+            startPosition = { ...wizardPosition }
+            endPosition = { ...heroPosition }
+          } else {
+            startPosition = { ...heroPosition }
+            endPosition = { ...wizardPosition }
+          }
+
+          newState = {
+            ...newState,
+            heroes: [
+              ...newState.heroes.slice(0, wizardIndex),
+              {
+                ...newState.heroes[wizardIndex],
+                position: { ...heroPosition },
+              },
+              ...newState.heroes.slice(wizardIndex + 1),
+            ],
+          }
+
+          newState = {
+            ...newState,
+            heroes: [
+              ...newState.heroes.slice(0, heroIndex),
+              {
+                ...newState.heroes[heroIndex],
+                position: { ...wizardPosition },
+              },
+              ...newState.heroes.slice(heroIndex + 1),
+            ],
+          }
+        }
 
         const teleportBeam = {
           visible: true,
           width: 0,
-          position: { 
+          position: {
             x: 0,
             y: 0,
           },
           rotation: 0,
-        }
-
-        let startPosition:V2|null = null
-        let endPosition:V2|null = null
-
-        if (heroPosition.x < rockPosition.x) {
-          startPosition = { ...heroPosition }
-          endPosition = { ...rockPosition }
-        } else {
-          startPosition = { ...rockPosition }
-          endPosition = { ...heroPosition }
         }
 
         teleportBeam.position = {
@@ -924,24 +998,8 @@ const App = () => {
         }
 
         newState = {
-          ...state,
-          rocks: [
-            ...state.rocks.slice(0, rockIndex),
-            {
-              ...state.rocks[rockIndex],
-              position: { ...heroPosition },
-            },
-            ...state.rocks.slice(rockIndex + 1),
-          ],
+          ...newState,
           teleportBeam,
-          heroes: [
-            ...state.heroes.slice(0, state.activeHeroIndex),
-            {
-              ...hero,
-              position: { ...rockPosition },
-            },
-            ...state.heroes.slice(state.activeHeroIndex + 1),
-          ]
         }
       } else {
         const nextPosition = getNextTileInDirection(hero.position, direction, rows, cols)
