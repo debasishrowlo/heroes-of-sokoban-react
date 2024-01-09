@@ -450,6 +450,37 @@ const levels:Level[] = [
       { x: 10, y: 6 },
     ],
   },
+  {
+    popupMessage: "Heroes can move each other",
+    tilemap: [
+      2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+      2, 1, 2, 1, 1, 2, 2, 1, 1, 1, 2,
+      2, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2,
+      2, 1, 1, 1, 1, 1, 2, 1, 1, 2, 2,
+      2, 1, 2, 2, 2, 1, 1, 1, 1, 1, 2,
+      2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+    ],
+    tilesPerRow: 11,
+    heroes: [
+      {
+        type: heroTypes.wizard,
+        position: { x: 1, y: 4, },
+      },
+      {
+        type: heroTypes.thief,
+        position: { x: 4, y: 2, },
+      },
+    ],
+    rocks: [
+      { x: 1, y: 1 },
+      { x: 6, y: 4 },
+      { x: 9, y: 4 },
+    ],
+    goals: [
+      { x: 7, y: 1 },
+      { x: 9, y: 1 },
+    ],
+  },
 ]
 
 const tileSize = 55
