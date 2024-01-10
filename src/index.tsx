@@ -865,7 +865,6 @@ const App = () => {
       return
     }
 
-    let newState = { ...state }
     let direction:directions|null = null
 
     const upKeyPressed = (key === "ArrowUp" || key === "w" || key === "W")
@@ -879,6 +878,8 @@ const App = () => {
     else if (rightKeyPressed) { direction = directions.right }
 
     if (!direction) { return }
+
+    let newState = { ...state }
 
     const level = levels[newState.levelIndex]
     const rows = getRows(level)
@@ -1220,6 +1221,15 @@ const App = () => {
           onClick={() => showLevelSelect()}
         >
           Levels
+        </button>
+      </div>
+      <div className="px-6 fixed bottom-0 left-0">
+        <button
+          type="button" 
+          className="p-4 text-18 text-gray-100"
+          onClick={() => showLevelSelect()}
+        >
+          R - Reset level
         </button>
       </div>
       <div
