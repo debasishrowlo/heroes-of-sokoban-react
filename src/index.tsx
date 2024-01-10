@@ -690,6 +690,58 @@ const levels:Level[] = [
       { x: 5, y: 5 },
     ],
   },
+  {
+    tilemap: [
+      2, 2, 2, 2, 2, 2, 2,
+      2, 1, 1, 1, 1, 1, 2,
+      2, 1, 1, 1, 1, 1, 2,
+      2, 1, 1, 1, 1, 1, 2,
+      2, 1, 1, 1, 1, 1, 2,
+      2, 1, 1, 1, 1, 1, 2,
+      2, 2, 2, 2, 2, 2, 2,
+    ],
+    tilesPerRow: 7,
+    heroes: [
+      {
+        type: heroTypes.warrior,
+        position: { x: 5, y: 1, },
+      },
+      {
+        type: heroTypes.thief,
+        position: { x: 5, y: 3, },
+      },
+      {
+        type: heroTypes.wizard,
+        position: { x: 5, y: 5, },
+      },
+    ],
+    rocks: [
+      { x: 2, y: 1 },
+      { x: 3, y: 1 },
+      { x: 4, y: 1 },
+      { x: 1, y: 2 },
+      { x: 2, y: 2 },
+      { x: 3, y: 2 },
+      { x: 4, y: 2 },
+      { x: 5, y: 2 },
+      { x: 2, y: 3 },
+      { x: 3, y: 3 },
+      { x: 4, y: 3 },
+      { x: 1, y: 4 },
+      { x: 2, y: 4 },
+      { x: 3, y: 4 },
+      { x: 4, y: 4 },
+      { x: 5, y: 4 },
+      { x: 2, y: 5 },
+      { x: 3, y: 5 },
+      { x: 4, y: 5 },
+    ],
+    goals: [
+      { x: 1, y: 1 },
+      { x: 1, y: 3 },
+      { x: 1, y: 5 },
+    ],
+  },
 ]
 
 const tileSize = 55
@@ -1378,7 +1430,8 @@ const App = () => {
                       fontSize: 10,
                     }}
                     key={`col-${index}`}
-                  />
+                  >
+                  </div>
                 )
               })}
             </div>
