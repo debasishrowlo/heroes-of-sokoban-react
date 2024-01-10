@@ -607,6 +607,43 @@ const levels:Level[] = [
       { x: 11, y: 5 },
     ],
   },
+  {
+    tilemap: [
+      2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+      2, 2, 1, 1, 2, 1, 2, 1, 2, 1, 1, 1, 2, 
+      2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 
+      2, 2, 1, 1, 2, 1, 2, 2, 2, 1, 1, 1, 2, 
+      2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+    ],
+    tilesPerRow: 13,
+    heroes: [
+      {
+        type: heroTypes.warrior,
+        position: { x: 5, y: 1, },
+      },
+      {
+        type: heroTypes.wizard,
+        position: { x: 5, y: 3, },
+      },
+    ],
+    rocks: [
+      { x: 1, y: 2 },
+      { x: 7, y: 1, },
+    ],
+    switchGates: [
+      {
+        color: switchGateColors.yellow,
+        position: { x: 4, y: 2 },
+        switches: [
+          { x: 10, y: 2 },
+        ],
+      },
+    ],
+    goals: [
+      { x: 2, y: 1 },
+      { x: 2, y: 3 },
+    ],
+  },
 ]
 
 const tileSize = 55
@@ -1278,12 +1315,13 @@ const App = () => {
 
                 return (
                   <div 
-                    className={`relative flex items-center justify-center ${borderColor} ${bgColor} aspect-square`}
+                    className={`relative flex items-center justify-center ${borderColor} ${bgColor} text-white aspect-square`}
                     style={{ 
                       width: `${tileSize}px`,
                       backgroundImage: `url(${tilesetImage})`,
                       backgroundSize: `${bgSize}px ${bgSize}px`,
                       backgroundPosition,
+                      fontSize: 10,
                     }}
                     key={`col-${index}`}
                   />
