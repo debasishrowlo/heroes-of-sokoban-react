@@ -644,6 +644,52 @@ const levels:Level[] = [
       { x: 2, y: 3 },
     ],
   },
+  {
+    tilemap: [
+      2, 2, 2, 2, 2, 2, 2, 2, 2,
+      2, 1, 1, 1, 1, 1, 1, 1, 2,
+      2, 2, 2, 2, 2, 2, 2, 1, 2,
+      2, 1, 1, 1, 1, 1, 2, 1, 2,
+      2, 1, 1, 2, 2, 1, 2, 1, 2,
+      2, 1, 1, 2, 1, 1, 2, 1, 2,
+      2, 2, 1, 2, 2, 2, 2, 1, 2,
+      2, 1, 1, 1, 1, 1, 1, 1, 2,
+      2, 2, 1, 2, 2, 2, 2, 1, 2,
+      2, 2, 2, 2, 2, 2, 2, 2, 2,
+    ],
+    tilesPerRow: 9,
+    heroes: [
+      {
+        type: heroTypes.warrior,
+        position: { x: 1, y: 3, },
+      },
+      {
+        type: heroTypes.thief,
+        position: { x: 2, y: 3, },
+      },
+      {
+        type: heroTypes.wizard,
+        position: { x: 3, y: 3, },
+      },
+    ],
+    rocks: [
+      { x: 1, y: 1 },
+    ],
+    switchGates: [
+      {
+        color: switchGateColors.purple,
+        position: { x: 5, y: 3 },
+        switches: [
+          { x: 2, y: 8 },
+        ],
+      },
+    ],
+    goals: [
+      { x: 5, y: 4 },
+      { x: 4, y: 5 },
+      { x: 5, y: 5 },
+    ],
+  },
 ]
 
 const tileSize = 55
@@ -938,7 +984,15 @@ const App = () => {
         const tileIsEmpty = entityOnTile === null
         if (tileIsEmpty) { break }
 
-        if (tileContainsImmovableEntity(newState, entityOnTile)) {
+        const tileContainsGate = entityOnTile.type === entityTypes.gate
+        const tileGateOpen = tileContainsGate ? isGateOpen(newState, entityOnTile.index) : false
+        const tileContainsOpenGate = tileContainsGate && tileGateOpen
+        if (tileIsEmpty || tileContainsOpenGate) { break }
+
+        const tileContainsWall = entityOnTile.type === entityTypes.wall
+        const tileContainsClosedGate = tileContainsGate && !tileGateOpen
+        const tileContainsImmovableEntity = tileContainsWall || tileContainsClosedGate
+        if (tileContainsImmovableEntity) {
           entitiesToBeMoved = []
           break
         } 
