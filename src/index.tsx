@@ -19,6 +19,10 @@ const enum entityTypes {
   wall = "wall",
 }
 
+const enum eventTypes {
+  move = "move",
+}
+
 const enum directions {
   up = "up",
   down = "down",
@@ -57,6 +61,8 @@ type Entity = (
   | WallEntity
 )
 
+type Event = MoveEvent
+
 type GateEntity = {
   type: entityTypes.gate,
   index: number,
@@ -82,6 +88,13 @@ type Level = {
 
 type MovableEntity = HeroEntity | RockEntity
 
+type MoveEvent = {
+  type: eventTypes.move,
+  entity: MovableEntity,
+  from: V2,
+  to: V2,
+}
+
 type RockEntity = {
   type: entityTypes.rock,
   index: number,
@@ -89,6 +102,7 @@ type RockEntity = {
 
 type State = {
   levelIndex: number,
+  tilesPerRow: number,
   gameStatus: gameStatuses,
   popup: {
     visible: boolean,
@@ -114,6 +128,7 @@ type State = {
     left: number,
     top: number,
   },
+  turns: Turn[],
 }
 
 type SwitchGate = {
@@ -123,6 +138,8 @@ type SwitchGate = {
 }
 
 type Tilemap = number[]
+
+type Turn = Event[]
 
 type WallEntity = {
   type: entityTypes.wall,
@@ -765,7 +782,8 @@ const generateLevel = (index:number):State => {
   const rocks = [rock1, rock2, rock3, rock4, rock5]
 
   const level = levels[index]
-  const state = {
+  const state:State = {
+    turns: [],
     levelIndex: index,
     gameStatus: gameStatuses.playing,
     tilesPerRow: level.tilesPerRow,
@@ -983,8 +1001,38 @@ const App = () => {
       return
     }
 
-    const rKeyPressed = key === "r" || key === "R"
+    let newState:State = { ...state }
 
+    const zKeyPressed = key === "z" || key === "Z"
+    const turnsAvailableToUndo = newState.turns.length > 0
+    if (zKeyPressed && turnsAvailableToUndo) {
+      const previousTurnEvents = newState.turns[newState.turns.length - 1]
+
+      for (let i = 0; i < previousTurnEvents.length; i++) {
+        const event = previousTurnEvents[i]
+
+        if (event.type === eventTypes.move) {
+          if (event.entity.type === entityTypes.hero) {
+            newState = moveHero(newState, event.entity.index, event.from)
+          }
+
+          if (event.entity.type === entityTypes.rock) {
+            newState = moveRock(newState, event.entity.index, event.from)
+          }
+        }
+      }
+
+      newState = {
+        ...newState,
+        turns: newState.turns.slice(0, -1)
+      }
+
+      setState({ ...newState })
+
+      return
+    }
+
+    const rKeyPressed = key === "r" || key === "R"
     if (rKeyPressed) {
       pauseTransitions(150)
       loadLevel(state.levelIndex)
@@ -1014,12 +1062,12 @@ const App = () => {
 
     if (!direction) { return }
 
-    let newState = { ...state }
-
     const level = levels[newState.levelIndex]
     const rows = getRows(level)
     const cols = level.tilesPerRow
     const hero = newState.heroes[newState.activeHeroIndex]
+
+    const events = []
 
     if (hero.type === heroTypes.warrior) {
       let entitiesToBeMoved:Array<Entity> = [
@@ -1065,11 +1113,21 @@ const App = () => {
         if (tileContainsHero) {
           const hero = newState.heroes[entity.index]
           const nextPosition = getNextTileInDirection(hero.position, direction, rows, cols)
-          newState = moveHero(newState, entity.index, nextPosition)
+          events.push({
+            type: eventTypes.move,
+            entity,
+            from: { ...hero.position },
+            to: { ...nextPosition },
+          })
         } else if (tileContainsRock) {
           const rock = newState.rocks[entity.index]
           const nextPosition = getNextTileInDirection(rock.position, direction, rows, cols)
-          newState = moveRock(newState, entity.index, nextPosition)
+          events.push({
+            type: eventTypes.move,
+            entity,
+            from: { ...rock.position },
+            to: { ...nextPosition },
+          })
         }
       }
     } else if (hero.type === heroTypes.thief) {
@@ -1211,6 +1269,31 @@ const App = () => {
         if (tileIsEmpty || !tileContainsImmovableEntity(newState, entityOnTile)) {
           newState = moveHero(newState, newState.activeHeroIndex, nextPosition)
         }
+      }
+    }
+
+    for (let i = 0; i < events.length; i++) {
+      const event = events[i]
+
+      if (event.type === eventTypes.move) {
+        if (event.entity.type === entityTypes.hero) {
+          newState = moveHero(newState, event.entity.index, event.to)
+        }
+
+        if (event.entity.type === entityTypes.rock) {
+          newState = moveRock(newState, event.entity.index, event.to)
+        }
+      }
+    }
+
+    if (events.length) {
+      const turn = [...events]
+      newState = {
+        ...newState,
+        turns: [
+          ...newState.turns,
+          turn,
+        ],
       }
     }
 
