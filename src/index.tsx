@@ -774,8 +774,13 @@ const imagesToBeLoaded = [
   tilesetImage,
 ]
 
-const v2Equal = (p1:V2, p2:V2) => {
-  return p1.x === p2.x && p1.y === p2.y
+const createMoveEvent = (entity:MovableEntity, from:V2, to:V2) => {
+  return {
+    type: eventTypes.move,
+    entity,
+    from: { ...from },
+    to: { ...to },
+  }
 }
 
 const generateLevel = (index:number):State => {
@@ -960,6 +965,10 @@ const tileContainsMovableEntity = (entity:Entity):boolean => {
   return tileContainsRock || tileContainsHero
 }
 
+const v2Equal = (p1:V2, p2:V2) => {
+  return p1.x === p2.x && p1.y === p2.y
+}
+
 const xKeyPressed = (key:KeyboardEvent["key"]) => {
   return key === "x" || key === "X"
 }
@@ -1113,21 +1122,11 @@ const App = () => {
         if (tileContainsHero) {
           const hero = newState.heroes[entity.index]
           const nextPosition = getNextTileInDirection(hero.position, direction, rows, cols)
-          events.push({
-            type: eventTypes.move,
-            entity,
-            from: { ...hero.position },
-            to: { ...nextPosition },
-          })
+          events.push(createMoveEvent(entity, hero.position, nextPosition))
         } else if (tileContainsRock) {
           const rock = newState.rocks[entity.index]
           const nextPosition = getNextTileInDirection(rock.position, direction, rows, cols)
-          events.push({
-            type: eventTypes.move,
-            entity,
-            from: { ...rock.position },
-            to: { ...nextPosition },
-          })
+          events.push(createMoveEvent(entity, rock.position, nextPosition))
         }
       }
     } else if (hero.type === heroTypes.thief) {
@@ -1157,15 +1156,19 @@ const App = () => {
 
         const oppositeTileContainsRock = entityOnOppositeTile && entityOnOppositeTile.type === entityTypes.rock
         if (oppositeTileContainsRock) {
-          newState = moveRock(newState, entityOnOppositeTile.index, currentPosition)
+          const rockPosition = newState.rocks[entityOnOppositeTile.index].position
+          events.push(createMoveEvent(entityOnOppositeTile, rockPosition, currentPosition))
         }
 
         const oppositeTileContainsHero = entityOnOppositeTile && entityOnOppositeTile.type === entityTypes.hero
         if (oppositeTileContainsHero) {
-          newState = moveHero(newState, entityOnOppositeTile.index, currentPosition)
+          const heroPosition = newState.heroes[entityOnOppositeTile.index].position
+          events.push(createMoveEvent(entityOnOppositeTile, heroPosition, currentPosition))
         }
 
-        newState = moveHero(newState, newState.activeHeroIndex, nextPosition)
+        const heroPosition = newState.heroes[newState.activeHeroIndex].position
+        const heroEntity:HeroEntity = { type: entityTypes.hero, index: newState.activeHeroIndex }
+        events.push(createMoveEvent(heroEntity, heroPosition, nextPosition))
       }
     } else if (hero.type === heroTypes.wizard) {
       let entity:MovableEntity = null
