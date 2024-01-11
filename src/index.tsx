@@ -1456,14 +1456,9 @@ const App = () => {
           Levels
         </button>
       </div>
-      <div className="px-6 fixed bottom-0 left-0">
-        <button
-          type="button" 
-          className="p-4 text-18 text-gray-100"
-          onClick={() => showLevelSelect()}
-        >
-          R - Reset level
-        </button>
+      <div className="px-6 py-4 fixed bottom-0 left-0">
+        <p className="text-18 text-gray-100">Z - Undo Move</p>
+        <p className="mt-2 text-18 text-gray-100">R - Reset level</p>
       </div>
       <div
         className="relative"
