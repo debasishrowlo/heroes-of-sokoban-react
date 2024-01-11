@@ -10,7 +10,7 @@ import rock2 from "./assets/rock2.png"
 import rock3 from "./assets/rock3.png"
 import rock4 from "./assets/rock4.png"
 import rock5 from "./assets/rock5.png"
-import tilesetImage from "./assets/tileset.png"
+import tilesetImg from "./assets/tileset2.png"
 
 const enum entityTypes {
   hero = "hero",
@@ -771,7 +771,7 @@ const imagesToBeLoaded = [
   rock3,
   rock4,
   rock5,
-  tilesetImage,
+  tilesetImg,
 ]
 
 const createMoveEvent = (entity:MovableEntity, from:V2, to:V2) => {
@@ -1475,33 +1475,37 @@ const App = () => {
                 let borderColor = "border-transparent"
 
                 const tileset = {
-                  size: 256,
-                  tileSize: 32,
+                  img: tilesetImg,
+                  width: 160,
+                  height: 80,
+                  tileSize: 16,
+                  wallTexture: { x: 4, y: 1 },
+                  floorTexture: { x: 5, y: 0 },
                 }
 
                 const scale = tileSize / tileset.tileSize
 
                 const bgTileSize = tileset.tileSize * scale
-                const bgSize = scale * tileset.size
+                const bgSize = {
+                  x: scale * tileset.width,
+                  y: scale * tileset.height,
+                }
 
-                let textureX = 0
-                let textureY = 0
+                let texturePosition:V2|null = null
 
                 const tileValue = getTileValue(level, { x: col, y: row })
                 if (tileValue === tileTypes.floor) {
                   bgColor = "bg-gray-100"
                   borderColor = "border-gray-300"
-                  textureX = 3
-                  textureY = 2
+                  texturePosition = { ...tileset.floorTexture }
                 } else if (tileValue === tileTypes.wall) {
                   bgColor = "bg-gray-700"
                   borderColor = "border-gray-700"
-                  textureX = 3
-                  textureY = 0
+                  texturePosition = { ...tileset.wallTexture }
                 }
 
-                const backgroundX = textureX * bgTileSize * -1
-                const backgroundY = textureY * bgTileSize * -1
+                const backgroundX = texturePosition.x * bgTileSize * -1
+                const backgroundY = texturePosition.y * bgTileSize * -1
                 const backgroundPosition = `${backgroundX}px ${backgroundY}px`
 
                 return (
@@ -1509,8 +1513,8 @@ const App = () => {
                     className={`relative flex items-center justify-center ${borderColor} ${bgColor} text-white aspect-square`}
                     style={{ 
                       width: `${tileSize}px`,
-                      backgroundImage: `url(${tilesetImage})`,
-                      backgroundSize: `${bgSize}px ${bgSize}px`,
+                      backgroundImage: `url(${tileset.img})`,
+                      backgroundSize: `${bgSize.x}px ${bgSize.y}px`,
                       backgroundPosition,
                       fontSize: 10,
                     }}
