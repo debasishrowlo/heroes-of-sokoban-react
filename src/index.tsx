@@ -1204,8 +1204,10 @@ const App = () => {
           const rockIndex = entityToSwap.index
           const rockPosition = newState.rocks[rockIndex].position
 
-          newState = moveRock(newState, rockIndex, heroPosition)
-          newState = moveHero(newState, heroIndex, rockPosition)
+          const heroEntity:HeroEntity = { type: entityTypes.hero, index: heroIndex }
+          const rockEntity:RockEntity = { type: entityTypes.rock, index: rockIndex }
+          events.push(createMoveEvent(heroEntity, heroPosition, rockPosition))
+          events.push(createMoveEvent(rockEntity, rockPosition, heroPosition))
 
           if (heroPosition.x < rockPosition.x) {
             startPosition = { ...heroPosition }
@@ -1221,8 +1223,10 @@ const App = () => {
           const heroIndex = entityToSwap.index
           const heroPosition = newState.heroes[heroIndex].position
 
-          newState = moveHero(newState, wizardIndex, heroPosition)
-          newState = moveHero(newState, heroIndex, wizardPosition)
+          const wizardEntity:HeroEntity = { type: entityTypes.hero, index: wizardIndex }
+          const heroEntity:HeroEntity = { type: entityTypes.hero, index: heroIndex }
+          events.push(createMoveEvent(wizardEntity, wizardPosition, heroPosition))
+          events.push(createMoveEvent(heroEntity, heroPosition, wizardPosition))
 
           if (wizardPosition.x < heroPosition.x) {
             startPosition = { ...wizardPosition }
