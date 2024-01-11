@@ -19,6 +19,10 @@ const enum entityTypes {
   wall = "wall",
 }
 
+const enum eventTypes {
+  move = "move",
+}
+
 const enum directions {
   up = "up",
   down = "down",
@@ -57,6 +61,8 @@ type Entity = (
   | WallEntity
 )
 
+type Event = MoveEvent
+
 type GateEntity = {
   type: entityTypes.gate,
   index: number,
@@ -82,6 +88,13 @@ type Level = {
 
 type MovableEntity = HeroEntity | RockEntity
 
+type MoveEvent = {
+  type: eventTypes.move,
+  entity: MovableEntity,
+  from: V2,
+  to: V2,
+}
+
 type RockEntity = {
   type: entityTypes.rock,
   index: number,
@@ -89,6 +102,7 @@ type RockEntity = {
 
 type State = {
   levelIndex: number,
+  tilesPerRow: number,
   gameStatus: gameStatuses,
   popup: {
     visible: boolean,
@@ -114,6 +128,7 @@ type State = {
     left: number,
     top: number,
   },
+  turns: Turn[],
 }
 
 type SwitchGate = {
@@ -123,6 +138,8 @@ type SwitchGate = {
 }
 
 type Tilemap = number[]
+
+type Turn = Event[]
 
 type WallEntity = {
   type: entityTypes.wall,
@@ -757,15 +774,21 @@ const imagesToBeLoaded = [
   tilesetImage,
 ]
 
-const v2Equal = (p1:V2, p2:V2) => {
-  return p1.x === p2.x && p1.y === p2.y
+const createMoveEvent = (entity:MovableEntity, from:V2, to:V2) => {
+  return {
+    type: eventTypes.move,
+    entity,
+    from: { ...from },
+    to: { ...to },
+  }
 }
 
 const generateLevel = (index:number):State => {
   const rocks = [rock1, rock2, rock3, rock4, rock5]
 
   const level = levels[index]
-  const state = {
+  const state:State = {
+    turns: [],
     levelIndex: index,
     gameStatus: gameStatuses.playing,
     tilesPerRow: level.tilesPerRow,
@@ -942,6 +965,10 @@ const tileContainsMovableEntity = (entity:Entity):boolean => {
   return tileContainsRock || tileContainsHero
 }
 
+const v2Equal = (p1:V2, p2:V2) => {
+  return p1.x === p2.x && p1.y === p2.y
+}
+
 const xKeyPressed = (key:KeyboardEvent["key"]) => {
   return key === "x" || key === "X"
 }
@@ -983,8 +1010,38 @@ const App = () => {
       return
     }
 
-    const rKeyPressed = key === "r" || key === "R"
+    let newState:State = { ...state }
 
+    const zKeyPressed = key === "z" || key === "Z"
+    const turnsAvailableToUndo = newState.turns.length > 0
+    if (zKeyPressed && turnsAvailableToUndo) {
+      const previousTurnEvents = newState.turns[newState.turns.length - 1]
+
+      for (let i = 0; i < previousTurnEvents.length; i++) {
+        const event = previousTurnEvents[i]
+
+        if (event.type === eventTypes.move) {
+          if (event.entity.type === entityTypes.hero) {
+            newState = moveHero(newState, event.entity.index, event.from)
+          }
+
+          if (event.entity.type === entityTypes.rock) {
+            newState = moveRock(newState, event.entity.index, event.from)
+          }
+        }
+      }
+
+      newState = {
+        ...newState,
+        turns: newState.turns.slice(0, -1)
+      }
+
+      setState({ ...newState })
+
+      return
+    }
+
+    const rKeyPressed = key === "r" || key === "R"
     if (rKeyPressed) {
       pauseTransitions(150)
       loadLevel(state.levelIndex)
@@ -1014,12 +1071,12 @@ const App = () => {
 
     if (!direction) { return }
 
-    let newState = { ...state }
-
     const level = levels[newState.levelIndex]
     const rows = getRows(level)
     const cols = level.tilesPerRow
     const hero = newState.heroes[newState.activeHeroIndex]
+
+    const events = []
 
     if (hero.type === heroTypes.warrior) {
       let entitiesToBeMoved:Array<Entity> = [
@@ -1065,11 +1122,11 @@ const App = () => {
         if (tileContainsHero) {
           const hero = newState.heroes[entity.index]
           const nextPosition = getNextTileInDirection(hero.position, direction, rows, cols)
-          newState = moveHero(newState, entity.index, nextPosition)
+          events.push(createMoveEvent(entity, hero.position, nextPosition))
         } else if (tileContainsRock) {
           const rock = newState.rocks[entity.index]
           const nextPosition = getNextTileInDirection(rock.position, direction, rows, cols)
-          newState = moveRock(newState, entity.index, nextPosition)
+          events.push(createMoveEvent(entity, rock.position, nextPosition))
         }
       }
     } else if (hero.type === heroTypes.thief) {
@@ -1099,15 +1156,19 @@ const App = () => {
 
         const oppositeTileContainsRock = entityOnOppositeTile && entityOnOppositeTile.type === entityTypes.rock
         if (oppositeTileContainsRock) {
-          newState = moveRock(newState, entityOnOppositeTile.index, currentPosition)
+          const rockPosition = newState.rocks[entityOnOppositeTile.index].position
+          events.push(createMoveEvent(entityOnOppositeTile, rockPosition, currentPosition))
         }
 
         const oppositeTileContainsHero = entityOnOppositeTile && entityOnOppositeTile.type === entityTypes.hero
         if (oppositeTileContainsHero) {
-          newState = moveHero(newState, entityOnOppositeTile.index, currentPosition)
+          const heroPosition = newState.heroes[entityOnOppositeTile.index].position
+          events.push(createMoveEvent(entityOnOppositeTile, heroPosition, currentPosition))
         }
 
-        newState = moveHero(newState, newState.activeHeroIndex, nextPosition)
+        const heroPosition = newState.heroes[newState.activeHeroIndex].position
+        const heroEntity:HeroEntity = { type: entityTypes.hero, index: newState.activeHeroIndex }
+        events.push(createMoveEvent(heroEntity, heroPosition, nextPosition))
       }
     } else if (hero.type === heroTypes.wizard) {
       let entity:MovableEntity = null
@@ -1143,8 +1204,10 @@ const App = () => {
           const rockIndex = entityToSwap.index
           const rockPosition = newState.rocks[rockIndex].position
 
-          newState = moveRock(newState, rockIndex, heroPosition)
-          newState = moveHero(newState, heroIndex, rockPosition)
+          const heroEntity:HeroEntity = { type: entityTypes.hero, index: heroIndex }
+          const rockEntity:RockEntity = { type: entityTypes.rock, index: rockIndex }
+          events.push(createMoveEvent(heroEntity, heroPosition, rockPosition))
+          events.push(createMoveEvent(rockEntity, rockPosition, heroPosition))
 
           if (heroPosition.x < rockPosition.x) {
             startPosition = { ...heroPosition }
@@ -1160,8 +1223,10 @@ const App = () => {
           const heroIndex = entityToSwap.index
           const heroPosition = newState.heroes[heroIndex].position
 
-          newState = moveHero(newState, wizardIndex, heroPosition)
-          newState = moveHero(newState, heroIndex, wizardPosition)
+          const wizardEntity:HeroEntity = { type: entityTypes.hero, index: wizardIndex }
+          const heroEntity:HeroEntity = { type: entityTypes.hero, index: heroIndex }
+          events.push(createMoveEvent(wizardEntity, wizardPosition, heroPosition))
+          events.push(createMoveEvent(heroEntity, heroPosition, wizardPosition))
 
           if (wizardPosition.x < heroPosition.x) {
             startPosition = { ...wizardPosition }
@@ -1211,6 +1276,31 @@ const App = () => {
         if (tileIsEmpty || !tileContainsImmovableEntity(newState, entityOnTile)) {
           newState = moveHero(newState, newState.activeHeroIndex, nextPosition)
         }
+      }
+    }
+
+    for (let i = 0; i < events.length; i++) {
+      const event = events[i]
+
+      if (event.type === eventTypes.move) {
+        if (event.entity.type === entityTypes.hero) {
+          newState = moveHero(newState, event.entity.index, event.to)
+        }
+
+        if (event.entity.type === entityTypes.rock) {
+          newState = moveRock(newState, event.entity.index, event.to)
+        }
+      }
+    }
+
+    if (events.length) {
+      const turn = [...events]
+      newState = {
+        ...newState,
+        turns: [
+          ...newState.turns,
+          turn,
+        ],
       }
     }
 
@@ -1366,14 +1456,9 @@ const App = () => {
           Levels
         </button>
       </div>
-      <div className="px-6 fixed bottom-0 left-0">
-        <button
-          type="button" 
-          className="p-4 text-18 text-gray-100"
-          onClick={() => showLevelSelect()}
-        >
-          R - Reset level
-        </button>
+      <div className="px-6 py-4 fixed bottom-0 left-0">
+        <p className="text-18 text-gray-100">Z - Undo Move</p>
+        <p className="mt-2 text-18 text-gray-100">R - Reset level</p>
       </div>
       <div
         className="relative"
