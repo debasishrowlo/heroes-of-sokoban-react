@@ -750,6 +750,42 @@ const levels:Level[] = [
       { x: 1, y: 5 },
     ],
   },
+  // {
+  //   tilemap: [
+  //     2, 2, 2, 2, 2, 2, 2, 2, 
+  //     2, 1, 1, 1, 1, 1, 1, 2,
+  //     2, 2, 2, 2, 2, 2, 2, 2, 
+  //     2, 1, 1, 1, 1, 1, 1, 2,
+  //     2, 2, 2, 2, 2, 2, 2, 2, 
+  //     2, 1, 1, 1, 1, 1, 1, 2,
+  //     2, 2, 2, 2, 2, 2, 2, 2, 
+  //   ],
+  //   tilesPerRow: 8,
+  //   heroes: [
+  //     {
+  //       type: heroTypes.warrior,
+  //       position: { x: 1, y: 3, },
+  //     },
+  //     {
+  //       type: heroTypes.thief,
+  //       position: { x: 1, y: 5, },
+  //     },
+  //     {
+  //       type: heroTypes.wizard,
+  //       position: { x: 1, y: 1, },
+  //     },
+  //   ],
+  //   blocks: [
+  //     { x: 6, y: 1 },
+  //     { x: 2, y: 3 },
+  //     { x: 3, y: 3 },
+  //   ],
+  //   goals: [
+  //     { x: 4, y: 1 },
+  //     { x: 4, y: 3 },
+  //     { x: 4, y: 5 },
+  //   ],
+  // },
 ]
 
 const tileSize = 55
