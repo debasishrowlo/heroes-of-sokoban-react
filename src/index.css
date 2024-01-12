@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 body {
-    @apply bg-gray-900;
+    background-color: #262f3e;
 }
 
 .disable-transitions * {

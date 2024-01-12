@@ -4,17 +4,11 @@ import classnames from "classnames"
 
 import "./index.css"
 
-import gateIcon from "./assets/gate.png"
-import rock1 from "./assets/rock1.png"
-import rock2 from "./assets/rock2.png"
-import rock3 from "./assets/rock3.png"
-import rock4 from "./assets/rock4.png"
-import rock5 from "./assets/rock5.png"
-import tilesetImage from "./assets/tileset.png"
+import tilesetImg from "./assets/tileset.png"
 
 const enum entityTypes {
   hero = "hero",
-  rock = "rock",
+  block = "block",
   gate = "gate",
   wall = "wall",
 }
@@ -57,7 +51,7 @@ const enum tileTypes {
 type Entity = (
   GateEntity
   | HeroEntity
-  | RockEntity
+  | BlockEntity
   | WallEntity
 )
 
@@ -82,11 +76,11 @@ type Level = {
     position: V2,
   }>,
   goals: V2[],
-  rocks?: V2[],
+  blocks?: V2[],
   switchGates?: SwitchGate[],
 }
 
-type MovableEntity = HeroEntity | RockEntity
+type MovableEntity = HeroEntity | BlockEntity
 
 type MoveEvent = {
   type: eventTypes.move,
@@ -95,8 +89,8 @@ type MoveEvent = {
   to: V2,
 }
 
-type RockEntity = {
-  type: entityTypes.rock,
+type BlockEntity = {
+  type: entityTypes.block,
   index: number,
 }
 
@@ -108,10 +102,7 @@ type State = {
     visible: boolean,
     message: string,
   },
-  rocks: Array<{
-    position: V2,
-    img: string,
-  }>,
+  blocks: V2[],
   switchGates: SwitchGate[],
   teleportBeam: {
     visible: boolean,
@@ -179,7 +170,7 @@ const levels:Level[] = [
       2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
     ],
     tilesPerRow: 13,
-    rocks: [
+    blocks: [
       { x: 6, y: 1 },
       { x: 6, y: 2 },
       { x: 6, y: 3 },
@@ -221,13 +212,13 @@ const levels:Level[] = [
         position: { x: 2, y: 2, },
       },
     ],
-    rocks: [
+    blocks: [
       { x: 4, y: 2 },
     ],
     goals: [{ x: 10, y: 2 }],
   },
   {
-    popupMessage: `Press "R" to reset a level`,
+    popupMessage: "Press multiple switches at once",
     tilemap: [
       2, 2, 2, 2, 2, 2, 2, 2, 2,
       2, 1, 1, 1, 1, 1, 2, 1, 2,
@@ -245,7 +236,7 @@ const levels:Level[] = [
         position: { x: 1, y: 4, },
       },
     ],
-    rocks: [
+    blocks: [
       { x: 3, y: 2 },
       { x: 2, y: 3 },
       { x: 3, y: 3 },
@@ -288,7 +279,7 @@ const levels:Level[] = [
         position: { x: 2, y: 2, },
       },
     ],
-    rocks: [
+    blocks: [
       { x: 4, y: 2 },
       { x: 7, y: 1 },
       { x: 7, y: 3 },
@@ -313,7 +304,7 @@ const levels:Level[] = [
         position: { x: 1, y: 4, },
       },
     ],
-    rocks: [
+    blocks: [
       { x: 3, y: 2 },
       { x: 2, y: 3 },
       { x: 3, y: 3 },
@@ -348,7 +339,7 @@ const levels:Level[] = [
         position: { x: 5, y: 5, },
       },
     ],
-    rocks: [
+    blocks: [
       { x: 3, y: 5 },
     ],
     switchGates: [
@@ -388,7 +379,7 @@ const levels:Level[] = [
         position: { x: 2, y: 2, },
       },
     ],
-    rocks: [
+    blocks: [
       { x: 4, y: 1 },
       { x: 4, y: 2 },
     ],
@@ -412,7 +403,7 @@ const levels:Level[] = [
         position: { x: 5, y: 3, },
       },
     ],
-    rocks: [
+    blocks: [
       { x: 3, y: 2 },
       { x: 2, y: 3 },
       { x: 3, y: 3 },
@@ -447,7 +438,7 @@ const levels:Level[] = [
         position: { x: 1, y: 1, },
       },
     ],
-    rocks: [
+    blocks: [
       { x: 1, y: 3 },
       { x: 1, y: 5 },
       { x: 3, y: 5 },
@@ -480,7 +471,7 @@ const levels:Level[] = [
         position: { x: 2, y: 6, },
       },
     ],
-    rocks: [],
+    blocks: [],
     switchGates: [
       {
         color: switchGateColors.yellow,
@@ -523,7 +514,7 @@ const levels:Level[] = [
         position: { x: 4, y: 2, },
       },
     ],
-    rocks: [
+    blocks: [
       { x: 1, y: 1 },
       { x: 6, y: 4 },
       { x: 9, y: 4 },
@@ -554,7 +545,7 @@ const levels:Level[] = [
         position: { x: 1, y: 5, },
       },
     ],
-    rocks: [
+    blocks: [
       { x: 3, y: 1 },
       { x: 7, y: 1 },
       { x: 7, y: 2 },
@@ -600,7 +591,7 @@ const levels:Level[] = [
         position: { x: 11, y: 2, },
       },
     ],
-    rocks: [
+    blocks: [
       { x: 1, y: 2 },
     ],
     switchGates: [
@@ -643,7 +634,7 @@ const levels:Level[] = [
         position: { x: 5, y: 3, },
       },
     ],
-    rocks: [
+    blocks: [
       { x: 1, y: 2 },
       { x: 7, y: 1, },
     ],
@@ -689,7 +680,7 @@ const levels:Level[] = [
         position: { x: 3, y: 3, },
       },
     ],
-    rocks: [
+    blocks: [
       { x: 1, y: 1 },
     ],
     switchGates: [
@@ -732,7 +723,7 @@ const levels:Level[] = [
         position: { x: 5, y: 5, },
       },
     ],
-    rocks: [
+    blocks: [
       { x: 2, y: 1 },
       { x: 3, y: 1 },
       { x: 4, y: 1 },
@@ -759,19 +750,49 @@ const levels:Level[] = [
       { x: 1, y: 5 },
     ],
   },
+  // {
+  //   tilemap: [
+  //     2, 2, 2, 2, 2, 2, 2, 2, 
+  //     2, 1, 1, 1, 1, 1, 1, 2,
+  //     2, 2, 2, 2, 2, 2, 2, 2, 
+  //     2, 1, 1, 1, 1, 1, 1, 2,
+  //     2, 2, 2, 2, 2, 2, 2, 2, 
+  //     2, 1, 1, 1, 1, 1, 1, 2,
+  //     2, 2, 2, 2, 2, 2, 2, 2, 
+  //   ],
+  //   tilesPerRow: 8,
+  //   heroes: [
+  //     {
+  //       type: heroTypes.warrior,
+  //       position: { x: 1, y: 3, },
+  //     },
+  //     {
+  //       type: heroTypes.thief,
+  //       position: { x: 1, y: 5, },
+  //     },
+  //     {
+  //       type: heroTypes.wizard,
+  //       position: { x: 1, y: 1, },
+  //     },
+  //   ],
+  //   blocks: [
+  //     { x: 6, y: 1 },
+  //     { x: 2, y: 3 },
+  //     { x: 3, y: 3 },
+  //   ],
+  //   goals: [
+  //     { x: 4, y: 1 },
+  //     { x: 4, y: 3 },
+  //     { x: 4, y: 5 },
+  //   ],
+  // },
 ]
 
 const tileSize = 55
 const heroSize = tileSize / 1.5
 
 const imagesToBeLoaded = [
-  gateIcon,
-  rock1,
-  rock2,
-  rock3,
-  rock4,
-  rock5,
-  tilesetImage,
+  tilesetImg,
 ]
 
 const createMoveEvent = (entity:MovableEntity, from:V2, to:V2) => {
@@ -784,8 +805,6 @@ const createMoveEvent = (entity:MovableEntity, from:V2, to:V2) => {
 }
 
 const generateLevel = (index:number):State => {
-  const rocks = [rock1, rock2, rock3, rock4, rock5]
-
   const level = levels[index]
   const state:State = {
     turns: [],
@@ -804,10 +823,7 @@ const generateLevel = (index:number):State => {
     },
     heroes: level.heroes.map(hero => ({ ...hero })),
     activeHeroIndex: 0,
-    rocks: level.rocks ? level.rocks.map(position => ({
-      position,
-      img: rocks[Math.floor(Math.random() * (rocks.length - 1))],
-    })) : [],
+    blocks: level.blocks ? level.blocks.map(position => ({ ...position })) : [],
     switchGates: level.switchGates ? level.switchGates : [],
     margin: {
       left: 0,
@@ -823,11 +839,19 @@ const generateLevel = (index:number):State => {
 }
 
 const getEntityOnTile = (state:State, level:Level, position:V2):Entity|null => {
-  const rockIndex = state.rocks.findIndex(rock => v2Equal(rock.position, position))
-  if (rockIndex !== -1) {
+  const blockIndex = state.blocks.findIndex(blockPosition => v2Equal(blockPosition, position))
+  if (blockIndex !== -1) {
     return {
-      type: entityTypes.rock,
-      index: rockIndex,
+      type: entityTypes.block,
+      index: blockIndex,
+    }
+  }
+
+  const heroIndex = state.heroes.findIndex(hero => v2Equal(hero.position, position))
+  if (heroIndex !== -1) {
+    return {
+      type: entityTypes.hero,
+      index: heroIndex,
     }
   }
 
@@ -843,14 +867,6 @@ const getEntityOnTile = (state:State, level:Level, position:V2):Entity|null => {
   if (tileValue === tileTypes.wall) {
     return {
       type: entityTypes.wall,
-    }
-  }
-
-  const heroIndex = state.heroes.findIndex(hero => v2Equal(hero.position, position))
-  if (heroIndex !== -1) {
-    return {
-      type: entityTypes.hero,
-      index: heroIndex,
     }
   }
 
@@ -904,11 +920,11 @@ const isGateOpen = (state:State, gateIndex:number):boolean => {
       return v2Equal(switchPosition, hero.position)
     })
 
-    const isRockOnSwitch = state.rocks.some(
-      rock => v2Equal(rock.position, switchPosition)
+    const isBlockOnSwitch = state.blocks.some(
+      blockPosition => v2Equal(blockPosition, switchPosition)
     )
 
-    return isHeroOnSwitch || isRockOnSwitch
+    return isHeroOnSwitch || isBlockOnSwitch
   })
 
   const isOpen = allSwitchesPressed
@@ -930,16 +946,13 @@ const moveHero = (state:State, heroIndex:number, position:V2):State => {
   }
 }
 
-const moveRock = (state:State, rockIndex:number, position:V2):State => {
+const moveBlock = (state:State, blockIndex:number, position:V2):State => {
   return {
     ...state,
-    rocks: [
-      ...state.rocks.slice(0, rockIndex),
-      {
-        ...state.rocks[rockIndex],
-        position: { ...position },
-      },
-      ...state.rocks.slice(rockIndex + 1),
+    blocks: [
+      ...state.blocks.slice(0, blockIndex),
+      { ...position },
+      ...state.blocks.slice(blockIndex + 1),
     ]
   }
 }
@@ -960,9 +973,9 @@ const tileContainsImmovableEntity = (state:State, entity:Entity):boolean => {
 }
 
 const tileContainsMovableEntity = (entity:Entity):boolean => {
-  const tileContainsRock = entity.type === entityTypes.rock
+  const tileContainsBlock = entity.type === entityTypes.block
   const tileContainsHero = entity.type === entityTypes.hero
-  return tileContainsRock || tileContainsHero
+  return tileContainsBlock || tileContainsHero
 }
 
 const v2Equal = (p1:V2, p2:V2) => {
@@ -1025,8 +1038,8 @@ const App = () => {
             newState = moveHero(newState, event.entity.index, event.from)
           }
 
-          if (event.entity.type === entityTypes.rock) {
-            newState = moveRock(newState, event.entity.index, event.from)
+          if (event.entity.type === entityTypes.block) {
+            newState = moveBlock(newState, event.entity.index, event.from)
           }
         }
       }
@@ -1096,7 +1109,7 @@ const App = () => {
         const tileContainsGate = entityOnTile.type === entityTypes.gate
         const tileGateOpen = tileContainsGate ? isGateOpen(newState, entityOnTile.index) : false
         const tileContainsOpenGate = tileContainsGate && tileGateOpen
-        if (tileIsEmpty || tileContainsOpenGate) { break }
+        if (tileContainsOpenGate) { break }
 
         const tileContainsWall = entityOnTile.type === entityTypes.wall
         const tileContainsClosedGate = tileContainsGate && !tileGateOpen
@@ -1117,16 +1130,16 @@ const App = () => {
         const entity = entitiesToBeMoved[i]
 
         const tileContainsHero = entity.type === entityTypes.hero
-        const tileContainsRock = entity.type === entityTypes.rock
+        const tileContainsBlock = entity.type === entityTypes.block
 
         if (tileContainsHero) {
           const hero = newState.heroes[entity.index]
           const nextPosition = getNextTileInDirection(hero.position, direction, rows, cols)
           events.push(createMoveEvent(entity, hero.position, nextPosition))
-        } else if (tileContainsRock) {
-          const rock = newState.rocks[entity.index]
-          const nextPosition = getNextTileInDirection(rock.position, direction, rows, cols)
-          events.push(createMoveEvent(entity, rock.position, nextPosition))
+        } else if (tileContainsBlock) {
+          const blockPosition = newState.blocks[entity.index]
+          const nextPosition = getNextTileInDirection(blockPosition, direction, rows, cols)
+          events.push(createMoveEvent(entity, blockPosition, nextPosition))
         }
       }
     } else if (hero.type === heroTypes.thief) {
@@ -1154,10 +1167,10 @@ const App = () => {
         const oppositePosition = getNextTileInDirection(currentPosition, oppositeDirection, rows, cols)
         const entityOnOppositeTile = getEntityOnTile(newState, level, oppositePosition)
 
-        const oppositeTileContainsRock = entityOnOppositeTile && entityOnOppositeTile.type === entityTypes.rock
-        if (oppositeTileContainsRock) {
-          const rockPosition = newState.rocks[entityOnOppositeTile.index].position
-          events.push(createMoveEvent(entityOnOppositeTile, rockPosition, currentPosition))
+        const oppositeTileContainsBlock = entityOnOppositeTile && entityOnOppositeTile.type === entityTypes.block
+        if (oppositeTileContainsBlock) {
+          const blockPosition = newState.blocks[entityOnOppositeTile.index]
+          events.push(createMoveEvent(entityOnOppositeTile, blockPosition, currentPosition))
         }
 
         const oppositeTileContainsHero = entityOnOppositeTile && entityOnOppositeTile.type === entityTypes.hero
@@ -1194,26 +1207,26 @@ const App = () => {
         let startPosition:V2|null = null
         let endPosition:V2|null = null
 
-        const tileContainsRock = entityToSwap.type === entityTypes.rock
+        const tileContainsBlock = entityToSwap.type === entityTypes.block
         const tileContainsHero = entityToSwap.type === entityTypes.hero
 
-        if (tileContainsRock) {
+        if (tileContainsBlock) {
           const heroIndex = newState.activeHeroIndex
           const heroPosition = { ...hero.position }
 
-          const rockIndex = entityToSwap.index
-          const rockPosition = newState.rocks[rockIndex].position
+          const blockIndex = entityToSwap.index
+          const blockPosition = newState.blocks[blockIndex]
 
           const heroEntity:HeroEntity = { type: entityTypes.hero, index: heroIndex }
-          const rockEntity:RockEntity = { type: entityTypes.rock, index: rockIndex }
-          events.push(createMoveEvent(heroEntity, heroPosition, rockPosition))
-          events.push(createMoveEvent(rockEntity, rockPosition, heroPosition))
+          const blockEntity:BlockEntity = { type: entityTypes.block, index: blockIndex }
+          events.push(createMoveEvent(heroEntity, heroPosition, blockPosition))
+          events.push(createMoveEvent(blockEntity, blockPosition, heroPosition))
 
-          if (heroPosition.x < rockPosition.x) {
+          if (heroPosition.x < blockPosition.x) {
             startPosition = { ...heroPosition }
-            endPosition = { ...rockPosition }
+            endPosition = { ...blockPosition }
           } else {
-            startPosition = { ...rockPosition }
+            startPosition = { ...blockPosition }
             endPosition = { ...heroPosition }
           }
         } else if (tileContainsHero) {
@@ -1287,8 +1300,8 @@ const App = () => {
           newState = moveHero(newState, event.entity.index, event.to)
         }
 
-        if (event.entity.type === entityTypes.rock) {
-          newState = moveRock(newState, event.entity.index, event.to)
+        if (event.entity.type === entityTypes.block) {
+          newState = moveBlock(newState, event.entity.index, event.to)
         }
       }
     }
@@ -1475,33 +1488,36 @@ const App = () => {
                 let borderColor = "border-transparent"
 
                 const tileset = {
-                  size: 256,
-                  tileSize: 32,
+                  img: tilesetImg,
+                  width: 160,
+                  height: 80,
+                  tileSize: 16,
+                  wallTexture: { x: 4, y: 1 },
+                  floorTexture: { x: 5, y: 0 },
                 }
 
                 const scale = tileSize / tileset.tileSize
-
                 const bgTileSize = tileset.tileSize * scale
-                const bgSize = scale * tileset.size
+                const bgSize = {
+                  x: scale * tileset.width,
+                  y: scale * tileset.height,
+                }
 
-                let textureX = 0
-                let textureY = 0
+                let texturePosition:V2|null = null
 
                 const tileValue = getTileValue(level, { x: col, y: row })
                 if (tileValue === tileTypes.floor) {
                   bgColor = "bg-gray-100"
                   borderColor = "border-gray-300"
-                  textureX = 3
-                  textureY = 2
+                  texturePosition = { ...tileset.floorTexture }
                 } else if (tileValue === tileTypes.wall) {
                   bgColor = "bg-gray-700"
                   borderColor = "border-gray-700"
-                  textureX = 3
-                  textureY = 0
+                  texturePosition = { ...tileset.wallTexture }
                 }
 
-                const backgroundX = textureX * bgTileSize * -1
-                const backgroundY = textureY * bgTileSize * -1
+                const backgroundX = texturePosition.x * bgTileSize * -1
+                const backgroundY = texturePosition.y * bgTileSize * -1
                 const backgroundPosition = `${backgroundX}px ${backgroundY}px`
 
                 return (
@@ -1509,8 +1525,8 @@ const App = () => {
                     className={`relative flex items-center justify-center ${borderColor} ${bgColor} text-white aspect-square`}
                     style={{ 
                       width: `${tileSize}px`,
-                      backgroundImage: `url(${tilesetImage})`,
-                      backgroundSize: `${bgSize}px ${bgSize}px`,
+                      backgroundImage: `url(${tileset.img})`,
+                      backgroundSize: `${bgSize.x}px ${bgSize.y}px`,
                       backgroundPosition,
                       fontSize: 10,
                     }}
@@ -1525,9 +1541,30 @@ const App = () => {
         {level.goals.map((goalPosition, index) => {
           const mapPosition = getPosition(goalPosition, tileSize, tileSize)
 
+          const tileset = {
+            img: tilesetImg,
+            width: 160,
+            height: 80,
+            tileSize: 16,
+          }
+
+          const scale = tileSize / tileset.tileSize
+          const bgTileSize = tileset.tileSize * scale
+          const bgSize = {
+            x: scale * tileset.width,
+            y: scale * tileset.height,
+          }
+
+          const goalTexturePosition = { x: 9, y: 0 }
+          const texturePosition:V2|null = goalTexturePosition
+
+          const backgroundX = texturePosition.x * bgTileSize * -1
+          const backgroundY = texturePosition.y * bgTileSize * -1
+          const backgroundPosition = `${backgroundX}px ${backgroundY}px`
+
           return (
             <div
-              className="absolute p-1"
+              className="absolute"
               key={`goal-${index}`}
               style={{
                 width: `${tileSize}px`,
@@ -1536,7 +1573,15 @@ const App = () => {
                 top: `${mapPosition.y}px`,
               }}
             >
-              <img src={gateIcon} />
+              <div 
+                className="w-full h-full"
+                style={{
+                  backgroundImage: `url(${tileset.img})`,
+                  backgroundSize: `${bgSize.x}px ${bgSize.y}px`,
+                  backgroundPosition,
+                }}
+              >
+              </div>
             </div>
           )
         })}
@@ -1656,13 +1701,34 @@ const App = () => {
             width: `${state.teleportBeam.width}px`,
           }}
         ></div>
-        {state.rocks.map((rock, index) => {
-          const position = getPosition(rock.position, tileSize, tileSize)
+        {state.blocks.map((blockPosition, index) => {
+          const position = getPosition(blockPosition, tileSize, tileSize)
+
+          const tileset = {
+            img: tilesetImg,
+            width: 160,
+            height: 80,
+            tileSize: 16,
+          }
+
+          const scale = tileSize / tileset.tileSize
+          const bgTileSize = tileset.tileSize * scale
+          const bgSize = {
+            x: scale * tileset.width,
+            y: scale * tileset.height,
+          }
+
+          const blockTexturePosition = { x: 9, y: 1 }
+          const texturePosition:V2|null = blockTexturePosition
+
+          const backgroundX = texturePosition.x * bgTileSize * -1
+          const backgroundY = texturePosition.y * bgTileSize * -1
+          const backgroundPosition = `${backgroundX}px ${backgroundY}px`
 
           return (
             <div 
-              className="p-1.5 absolute flex items-center justify-center transition-all"
-              key={`rock-${index}`}
+              className="absolute flex items-center justify-center transition-all"
+              key={`block-${index}`}
               style={{
                 width: `${tileSize}px`,
                 height: `${tileSize}px`,
@@ -1670,7 +1736,15 @@ const App = () => {
                 top: `${position.y}px`,
               }}
             >
-              <img src={rock.img} className="w-full" />
+              <div 
+                className="w-full h-full"
+                style={{
+                  backgroundImage: `url(${tileset.img})`,
+                  backgroundSize: `${bgSize.x}px ${bgSize.y}px`,
+                  backgroundPosition,
+                }}
+              >
+              </div>
             </div>
           )
         })}
