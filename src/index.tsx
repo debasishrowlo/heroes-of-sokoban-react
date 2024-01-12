@@ -847,6 +847,14 @@ const getEntityOnTile = (state:State, level:Level, position:V2):Entity|null => {
     }
   }
 
+  const heroIndex = state.heroes.findIndex(hero => v2Equal(hero.position, position))
+  if (heroIndex !== -1) {
+    return {
+      type: entityTypes.hero,
+      index: heroIndex,
+    }
+  }
+
   const gateIndex = state.switchGates.findIndex(gate => v2Equal(gate.position, position))
   if (gateIndex !== -1) {
     return {
@@ -859,14 +867,6 @@ const getEntityOnTile = (state:State, level:Level, position:V2):Entity|null => {
   if (tileValue === tileTypes.wall) {
     return {
       type: entityTypes.wall,
-    }
-  }
-
-  const heroIndex = state.heroes.findIndex(hero => v2Equal(hero.position, position))
-  if (heroIndex !== -1) {
-    return {
-      type: entityTypes.hero,
-      index: heroIndex,
     }
   }
 
@@ -1109,7 +1109,7 @@ const App = () => {
         const tileContainsGate = entityOnTile.type === entityTypes.gate
         const tileGateOpen = tileContainsGate ? isGateOpen(newState, entityOnTile.index) : false
         const tileContainsOpenGate = tileContainsGate && tileGateOpen
-        if (tileIsEmpty || tileContainsOpenGate) { break }
+        if (tileContainsOpenGate) { break }
 
         const tileContainsWall = entityOnTile.type === entityTypes.wall
         const tileContainsClosedGate = tileContainsGate && !tileGateOpen
