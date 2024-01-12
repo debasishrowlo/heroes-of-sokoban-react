@@ -5,11 +5,6 @@ import classnames from "classnames"
 import "./index.css"
 
 import gateIcon from "./assets/gate.png"
-import rock1 from "./assets/rock1.png"
-import rock2 from "./assets/rock2.png"
-import rock3 from "./assets/rock3.png"
-import rock4 from "./assets/rock4.png"
-import rock5 from "./assets/rock5.png"
 import tilesetImg from "./assets/tileset2.png"
 
 const enum entityTypes {
@@ -108,10 +103,7 @@ type State = {
     visible: boolean,
     message: string,
   },
-  rocks: Array<{
-    position: V2,
-    img: string,
-  }>,
+  rocks: V2[],
   switchGates: SwitchGate[],
   teleportBeam: {
     visible: boolean,
@@ -766,11 +758,6 @@ const heroSize = tileSize / 1.5
 
 const imagesToBeLoaded = [
   gateIcon,
-  rock1,
-  rock2,
-  rock3,
-  rock4,
-  rock5,
   tilesetImg,
 ]
 
@@ -784,8 +771,6 @@ const createMoveEvent = (entity:MovableEntity, from:V2, to:V2) => {
 }
 
 const generateLevel = (index:number):State => {
-  const rocks = [rock1, rock2, rock3, rock4, rock5]
-
   const level = levels[index]
   const state:State = {
     turns: [],
@@ -804,10 +789,7 @@ const generateLevel = (index:number):State => {
     },
     heroes: level.heroes.map(hero => ({ ...hero })),
     activeHeroIndex: 0,
-    rocks: level.rocks ? level.rocks.map(position => ({
-      position,
-      img: rocks[Math.floor(Math.random() * (rocks.length - 1))],
-    })) : [],
+    rocks: level.rocks ? level.rocks.map(position => ({ ...position })) : [],
     switchGates: level.switchGates ? level.switchGates : [],
     margin: {
       left: 0,
@@ -823,7 +805,7 @@ const generateLevel = (index:number):State => {
 }
 
 const getEntityOnTile = (state:State, level:Level, position:V2):Entity|null => {
-  const rockIndex = state.rocks.findIndex(rock => v2Equal(rock.position, position))
+  const rockIndex = state.rocks.findIndex(rockPosition => v2Equal(rockPosition, position))
   if (rockIndex !== -1) {
     return {
       type: entityTypes.rock,
@@ -905,7 +887,7 @@ const isGateOpen = (state:State, gateIndex:number):boolean => {
     })
 
     const isRockOnSwitch = state.rocks.some(
-      rock => v2Equal(rock.position, switchPosition)
+      rockPosition => v2Equal(rockPosition, switchPosition)
     )
 
     return isHeroOnSwitch || isRockOnSwitch
@@ -935,10 +917,7 @@ const moveRock = (state:State, rockIndex:number, position:V2):State => {
     ...state,
     rocks: [
       ...state.rocks.slice(0, rockIndex),
-      {
-        ...state.rocks[rockIndex],
-        position: { ...position },
-      },
+      { ...position },
       ...state.rocks.slice(rockIndex + 1),
     ]
   }
@@ -1124,9 +1103,9 @@ const App = () => {
           const nextPosition = getNextTileInDirection(hero.position, direction, rows, cols)
           events.push(createMoveEvent(entity, hero.position, nextPosition))
         } else if (tileContainsRock) {
-          const rock = newState.rocks[entity.index]
-          const nextPosition = getNextTileInDirection(rock.position, direction, rows, cols)
-          events.push(createMoveEvent(entity, rock.position, nextPosition))
+          const rockPosition = newState.rocks[entity.index]
+          const nextPosition = getNextTileInDirection(rockPosition, direction, rows, cols)
+          events.push(createMoveEvent(entity, rockPosition, nextPosition))
         }
       }
     } else if (hero.type === heroTypes.thief) {
@@ -1156,7 +1135,7 @@ const App = () => {
 
         const oppositeTileContainsRock = entityOnOppositeTile && entityOnOppositeTile.type === entityTypes.rock
         if (oppositeTileContainsRock) {
-          const rockPosition = newState.rocks[entityOnOppositeTile.index].position
+          const rockPosition = newState.rocks[entityOnOppositeTile.index]
           events.push(createMoveEvent(entityOnOppositeTile, rockPosition, currentPosition))
         }
 
@@ -1202,7 +1181,7 @@ const App = () => {
           const heroPosition = { ...hero.position }
 
           const rockIndex = entityToSwap.index
-          const rockPosition = newState.rocks[rockIndex].position
+          const rockPosition = newState.rocks[rockIndex]
 
           const heroEntity:HeroEntity = { type: entityTypes.hero, index: heroIndex }
           const rockEntity:RockEntity = { type: entityTypes.rock, index: rockIndex }
@@ -1484,7 +1463,6 @@ const App = () => {
                 }
 
                 const scale = tileSize / tileset.tileSize
-
                 const bgTileSize = tileset.tileSize * scale
                 const bgSize = {
                   x: scale * tileset.width,
@@ -1660,12 +1638,33 @@ const App = () => {
             width: `${state.teleportBeam.width}px`,
           }}
         ></div>
-        {state.rocks.map((rock, index) => {
-          const position = getPosition(rock.position, tileSize, tileSize)
+        {state.rocks.map((rockPosition, index) => {
+          const position = getPosition(rockPosition, tileSize, tileSize)
+
+          const tileset = {
+            img: tilesetImg,
+            width: 160,
+            height: 80,
+            tileSize: 16,
+          }
+
+          const scale = tileSize / tileset.tileSize
+          const bgTileSize = tileset.tileSize * scale
+          const bgSize = {
+            x: scale * tileset.width,
+            y: scale * tileset.height,
+          }
+
+          const blockTexturePosition = { x: 9, y: 1 }
+          const texturePosition:V2|null = blockTexturePosition
+
+          const backgroundX = texturePosition.x * bgTileSize * -1
+          const backgroundY = texturePosition.y * bgTileSize * -1
+          const backgroundPosition = `${backgroundX}px ${backgroundY}px`
 
           return (
             <div 
-              className="p-1.5 absolute flex items-center justify-center transition-all"
+              className="absolute flex items-center justify-center transition-all"
               key={`rock-${index}`}
               style={{
                 width: `${tileSize}px`,
@@ -1674,7 +1673,15 @@ const App = () => {
                 top: `${position.y}px`,
               }}
             >
-              <img src={rock.img} className="w-full" />
+              <div 
+                className="w-full h-full"
+                style={{
+                  backgroundImage: `url(${tileset.img})`,
+                  backgroundSize: `${bgSize.x}px ${bgSize.y}px`,
+                  backgroundPosition,
+                }}
+              >
+              </div>
             </div>
           )
         })}
