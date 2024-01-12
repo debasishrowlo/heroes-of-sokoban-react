@@ -4,7 +4,7 @@ import classnames from "classnames"
 
 import "./index.css"
 
-import tilesetImg from "./assets/tileset2.png"
+import tilesetImg from "./assets/tileset.png"
 
 const enum entityTypes {
   hero = "hero",
