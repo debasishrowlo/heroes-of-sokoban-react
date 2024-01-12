@@ -4,7 +4,6 @@ import classnames from "classnames"
 
 import "./index.css"
 
-import gateIcon from "./assets/gate.png"
 import tilesetImg from "./assets/tileset2.png"
 
 const enum entityTypes {
@@ -757,7 +756,6 @@ const tileSize = 55
 const heroSize = tileSize / 1.5
 
 const imagesToBeLoaded = [
-  gateIcon,
   tilesetImg,
 ]
 
@@ -1507,9 +1505,30 @@ const App = () => {
         {level.goals.map((goalPosition, index) => {
           const mapPosition = getPosition(goalPosition, tileSize, tileSize)
 
+          const tileset = {
+            img: tilesetImg,
+            width: 160,
+            height: 80,
+            tileSize: 16,
+          }
+
+          const scale = tileSize / tileset.tileSize
+          const bgTileSize = tileset.tileSize * scale
+          const bgSize = {
+            x: scale * tileset.width,
+            y: scale * tileset.height,
+          }
+
+          const goalTexturePosition = { x: 9, y: 0 }
+          const texturePosition:V2|null = goalTexturePosition
+
+          const backgroundX = texturePosition.x * bgTileSize * -1
+          const backgroundY = texturePosition.y * bgTileSize * -1
+          const backgroundPosition = `${backgroundX}px ${backgroundY}px`
+
           return (
             <div
-              className="absolute p-1"
+              className="absolute"
               key={`goal-${index}`}
               style={{
                 width: `${tileSize}px`,
@@ -1518,7 +1537,15 @@ const App = () => {
                 top: `${mapPosition.y}px`,
               }}
             >
-              <img src={gateIcon} />
+              <div 
+                className="w-full h-full"
+                style={{
+                  backgroundImage: `url(${tileset.img})`,
+                  backgroundSize: `${bgSize.x}px ${bgSize.y}px`,
+                  backgroundPosition,
+                }}
+              >
+              </div>
             </div>
           )
         })}
