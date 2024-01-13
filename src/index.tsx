@@ -1491,9 +1491,11 @@ const App = () => {
   const rows = getRows(level)
   const cols = level.tilesPerRow
 
+  const levelContainsTextures = level.textures
+
   return (
     <>
-      <div className="px-6 fixed top-0 right-0">
+      <div className="px-6 fixed z-10 top-0 right-0">
         <button
           type="button" 
           className="p-4 text-18 text-gray-100"
@@ -1502,7 +1504,7 @@ const App = () => {
           Levels
         </button>
       </div>
-      <div className="px-6 py-4 fixed bottom-0 left-0">
+      <div className="px-6 py-4 fixed z-10 bottom-0 left-0">
         <p className="text-18 text-gray-100">Z - Undo Move</p>
         <p className="mt-2 text-18 text-gray-100">R - Reset level</p>
       </div>
@@ -1646,54 +1648,53 @@ const App = () => {
             </div>
           )
         })}
-        {Array.from(Array(rows).keys()).map((row, index) => {
-          return (
-            <div className="w-full h-full flex absolute top-0 left-0" key={`row-${index}`}>
-              {Array.from(Array(cols).keys()).map((col, index) => {
-                const scale = tileSize / tileset.tileSize
-                const bgTileSize = tileset.tileSize * scale
-                const bgSize = {
-                  x: scale * tileset.width,
-                  y: scale * tileset.height,
-                }
+        {levelContainsTextures && (
+          <>
+            {Array.from(Array(rows).keys()).map((row, index) => {
+              return (
+                <div className="w-full h-full flex absolute top-0 left-0" key={`row-${index}`}>
+                  {Array.from(Array(cols).keys()).map((col, index) => {
+                    const shadowTextureIndex = getValueFromPosition(level.textures.shadows, { x: col, y: row }, level.tilesPerRow) - 1
 
-                let shadowTextureIndex = null
+                    const tileHasShadow = shadowTextureIndex !== -1
+                    if (!tileHasShadow) {
+                      return null
+                    }
 
-                if (level.textures) {
-                  shadowTextureIndex = getValueFromPosition(level.textures.shadows, { x: col, y: row }, level.tilesPerRow) - 1
-                }
+                    const scale = tileSize / tileset.tileSize
+                    const bgTileSize = tileset.tileSize * scale
+                    const bgSize = {
+                      x: scale * tileset.width,
+                      y: scale * tileset.height,
+                    }
 
-                const tileHasShadow = shadowTextureIndex !== null
-                let shadowTexturePosition = { x: 0, y: 0 }
-                let shadowBackgroundX = 0
-                let shadowBackgroundY = 0
-                if (tileHasShadow) {
-                  shadowTexturePosition = getPositionFromIndex(shadowTextureIndex, tileset.texturesPerRow)
-                  shadowBackgroundX = shadowTexturePosition.x * bgTileSize * -1
-                  shadowBackgroundY = shadowTexturePosition.y * bgTileSize * -1
-                }
+                    const shadowTexturePosition = getPositionFromIndex(shadowTextureIndex, tileset.texturesPerRow)
+                    const shadowBackgroundX = shadowTexturePosition.x * bgTileSize * -1
+                    const shadowBackgroundY = shadowTexturePosition.y * bgTileSize * -1
 
-                const tilePosition = getPosition({ x: col, y: row }, tileSize, tileSize)
+                    const tilePosition = getPosition({ x: col, y: row }, tileSize, tileSize)
 
-                return (
-                  <div
-                    className="absolute aspect-square"
-                    id="shadow"
-                    style={{
-                      width: `${tileSize}px`,
-                      top: `${tilePosition.y}px`,
-                      left: `${tilePosition.x}px`,
-                      backgroundImage: `url(${tileset.img})`,
-                      backgroundSize: `${bgSize.x}px ${bgSize.y}px`,
-                      backgroundPosition: `${shadowBackgroundX}px ${shadowBackgroundY}px`,
-                    }}
-                    key={`col-${index}`}
-                  ></div>
-                )
-              })}
-            </div>
-          )
-        })}
+                    return (
+                      <div
+                        className="absolute aspect-square"
+                        id="shadow"
+                        style={{
+                          width: `${tileSize}px`,
+                          top: `${tilePosition.y}px`,
+                          left: `${tilePosition.x}px`,
+                          backgroundImage: `url(${tileset.img})`,
+                          backgroundSize: `${bgSize.x}px ${bgSize.y}px`,
+                          backgroundPosition: `${shadowBackgroundX}px ${shadowBackgroundY}px`,
+                        }}
+                        key={`col-${index}`}
+                      ></div>
+                    )
+                  })}
+                </div>
+              )
+            })}
+          </>
+        )}
         {state.switchGates.map((gate:SwitchGate, index:number) => {
           const size = tileSize
           const position = getPosition(gate.position, size, size)
