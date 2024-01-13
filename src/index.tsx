@@ -68,6 +68,10 @@ type HeroEntity = {
 }
 
 type Level = {
+  textures?: {
+    surfaces: number[],
+    shadows: number[],
+  },
   popupMessage?: string,
   tilemap: Tilemap,
   tilesPerRow: number,
@@ -144,11 +148,16 @@ type V2 = {
 const levels:Level[] = [
   {
     popupMessage: `Use W, A, S, D keys to move`,
+    textures: {
+      surfaces: [1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 21, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 21, 21, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 21, 21, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 21, 31, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 34, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41],
+      shadows: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    },
     tilemap: [
       2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
       2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
       2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
       2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
+      2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
       2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
     ],
     tilesPerRow: 13,
@@ -791,6 +800,14 @@ const levels:Level[] = [
 const tileSize = 55
 const heroSize = tileSize / 1.5
 
+const tileset = {
+  img: tilesetImg,
+  width: 64 * 10,
+  height: 64 * 6,
+  tileSize: 64,
+  texturesPerRow: 10,
+}
+
 const createMoveEvent = (entity:MovableEntity, from:V2, to:V2) => {
   return {
     type: eventTypes.move,
@@ -870,7 +887,7 @@ const getEntityOnTile = (state:State, level:Level, position:V2):Entity|null => {
 }
 
 const getTileValue = (level:Level, position:V2) => {
-  return level.tilemap[position.y * level.tilesPerRow + position.x]
+  return getValueFromPosition(level.tilemap, position, level.tilesPerRow)
 }
 
 const getNextTileInDirection = (position:V2, direction:directions, rows:number, cols:number):V2 => {
@@ -906,6 +923,17 @@ const getPosition = (position:V2, width:number, height:number):V2 => {
     x: (position.x * tileSize) + (tileSize / 2) - (width / 2),
     y: (position.y * tileSize) + (tileSize / 2) - (height / 2),
   }
+}
+
+const getPositionFromIndex = (index:number, itemsPerRow:number):V2 => {
+  return {
+    x: (index % itemsPerRow),
+    y: Math.floor(index / itemsPerRow),
+  }
+}
+
+const getValueFromPosition = (list:any[], position:V2, itemsPerRow:number) => {
+  return list[position.y * itemsPerRow + position.x]
 }
 
 const isGateOpen = (state:State, gateIndex:number):boolean => {
@@ -1487,15 +1515,6 @@ const App = () => {
                 let bgColor = "bg-transparent"
                 let borderColor = "border-transparent"
 
-                const tileset = {
-                  img: tilesetImg,
-                  width: 64 * 10,
-                  height: 64 * 6,
-                  tileSize: 64,
-                  wallTexture: { x: 4, y: 1 },
-                  floorTexture: { x: 5, y: 0 },
-                }
-
                 const scale = tileSize / tileset.tileSize
                 const bgTileSize = tileset.tileSize * scale
                 const bgSize = {
@@ -1503,36 +1522,66 @@ const App = () => {
                   y: scale * tileset.height,
                 }
 
-                let texturePosition:V2|null = null
+                let surfaceTextureIndex = null
+                let shadowTextureIndex = null
 
-                const tileValue = getTileValue(level, { x: col, y: row })
-                if (tileValue === tileTypes.floor) {
-                  bgColor = "bg-gray-100"
-                  borderColor = "border-gray-300"
-                  texturePosition = { ...tileset.floorTexture }
-                } else if (tileValue === tileTypes.wall) {
-                  bgColor = "bg-gray-700"
-                  borderColor = "border-gray-700"
-                  texturePosition = { ...tileset.wallTexture }
+                if (level.textures) {
+                  surfaceTextureIndex = getValueFromPosition(level.textures.surfaces, { x: col, y: row }, level.tilesPerRow) - 1
+                  shadowTextureIndex = getValueFromPosition(level.textures.shadows, { x: col, y: row }, level.tilesPerRow) - 1
+                } else {
+                  const tileValue = getTileValue(level, { x: col, y: row })
+
+                  const wallSurfaceIndex = 14
+                  const floorSurfaceIndex = 5
+
+                  const tileIsWall = tileValue === tileTypes.wall
+                  surfaceTextureIndex = tileIsWall ? wallSurfaceIndex : floorSurfaceIndex
                 }
 
-                const backgroundX = texturePosition.x * bgTileSize * -1
-                const backgroundY = texturePosition.y * bgTileSize * -1
-                const backgroundPosition = `${backgroundX}px ${backgroundY}px`
+                const surfaceTexturePosition = getPositionFromIndex(surfaceTextureIndex, tileset.texturesPerRow)
+                const surfaceBackgroundX = surfaceTexturePosition.x * bgTileSize * -1
+                const surfaceBackgroundY = surfaceTexturePosition.y * bgTileSize * -1
+
+                const tileHasShadow = shadowTextureIndex !== null
+                let shadowTexturePosition = { x: 0, y: 0 }
+                let shadowBackgroundX = 0
+                let shadowBackgroundY = 0
+                if (tileHasShadow) {
+                  shadowTexturePosition = getPositionFromIndex(shadowTextureIndex, tileset.texturesPerRow)
+                  shadowBackgroundX = shadowTexturePosition.x * bgTileSize * -1
+                  shadowBackgroundY = shadowTexturePosition.y * bgTileSize * -1
+                }
 
                 return (
-                  <div 
-                    className={`relative flex items-center justify-center ${borderColor} ${bgColor} text-white aspect-square`}
-                    style={{ 
-                      width: `${tileSize}px`,
-                      backgroundImage: `url(${tileset.img})`,
-                      backgroundSize: `${bgSize.x}px ${bgSize.y}px`,
-                      backgroundPosition,
-                      fontSize: 10,
-                    }}
-                    key={`col-${index}`}
-                  >
-                  </div>
+                  <>
+                    <div 
+                      className={`relative flex items-center justify-center ${borderColor} ${bgColor} text-white aspect-square`}
+                      style={{
+                        width: `${tileSize}px`,
+                        fontSize: 10,
+                      }}
+                      key={`col-${index}`}
+                    >
+                      <div 
+                        className="absolute w-full h-full"
+                        style={{
+                          backgroundImage: `url(${tileset.img})`,
+                          backgroundSize: `${bgSize.x}px ${bgSize.y}px`,
+                          backgroundPosition: `${surfaceBackgroundX}px ${surfaceBackgroundY}px`,
+                        }}
+                      ></div>
+                      {tileHasShadow && (
+                        <div 
+                          className="absolute w-full h-full"
+                          style={{
+                            backgroundImage: `url(${tileset.img})`,
+                            backgroundSize: `${bgSize.x}px ${bgSize.y}px`,
+                            backgroundPosition: `${shadowBackgroundX}px ${shadowBackgroundY}px`,
+                          }}
+                        ></div>
+                      )}
+                    </div>
+                  </>
                 )
               })}
             </div>
@@ -1541,13 +1590,6 @@ const App = () => {
         {level.goals.map((goalPosition, index) => {
           const mapPosition = getPosition(goalPosition, tileSize, tileSize)
 
-          const tileset = {
-            img: tilesetImg,
-            width: 64 * 10,
-            height: 64 * 6,
-            tileSize: 64,
-          }
-
           const scale = tileSize / tileset.tileSize
           const bgTileSize = tileset.tileSize * scale
           const bgSize = {
@@ -1555,12 +1597,11 @@ const App = () => {
             y: scale * tileset.height,
           }
 
-          const goalTexturePosition = { x: 9, y: 0 }
-          const texturePosition:V2|null = goalTexturePosition
+          const goalTextureIndex = 9
+          const texturePosition = getPositionFromIndex(goalTextureIndex, tileset.texturesPerRow)
 
           const backgroundX = texturePosition.x * bgTileSize * -1
           const backgroundY = texturePosition.y * bgTileSize * -1
-          const backgroundPosition = `${backgroundX}px ${backgroundY}px`
 
           return (
             <div
@@ -1578,7 +1619,7 @@ const App = () => {
                 style={{
                   backgroundImage: `url(${tileset.img})`,
                   backgroundSize: `${bgSize.x}px ${bgSize.y}px`,
-                  backgroundPosition,
+                  backgroundPosition: `${backgroundX}px ${backgroundY}px`,
                 }}
               >
               </div>
@@ -1704,13 +1745,6 @@ const App = () => {
         {state.blocks.map((blockPosition, index) => {
           const position = getPosition(blockPosition, tileSize, tileSize)
 
-          const tileset = {
-            img: tilesetImg,
-            width: 64 * 10,
-            height: 64 * 6,
-            tileSize: 64,
-          }
-
           const scale = tileSize / tileset.tileSize
           const bgTileSize = tileset.tileSize * scale
           const bgSize = {
@@ -1718,8 +1752,8 @@ const App = () => {
             y: scale * tileset.height,
           }
 
-          const blockTexturePosition = { x: 9, y: 1 }
-          const texturePosition:V2|null = blockTexturePosition
+          const blockTextureIndex = 19
+          const texturePosition = getPositionFromIndex(blockTextureIndex, tileset.texturesPerRow)
 
           const backgroundX = texturePosition.x * bgTileSize * -1
           const backgroundY = texturePosition.y * bgTileSize * -1
