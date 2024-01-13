@@ -143,7 +143,7 @@ type V2 = {
 
 const levels:Level[] = [
   {
-    popupMessage: `Use W, A, S, D or arrow keys to move`,
+    popupMessage: `Use W, A, S, D keys to move`,
     tilemap: [
       2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
       2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
@@ -1068,10 +1068,10 @@ const App = () => {
 
     let direction:directions|null = null
 
-    const upKeyPressed = (key === "ArrowUp" || key === "w" || key === "W")
-    const downKeyPressed = (key === "ArrowDown" || key === "s" || key === "S")
-    const leftKeyPressed = (key === "ArrowLeft" || key === "a" || key === "A")
-    const rightKeyPressed = (key === "ArrowRight" || key === "d" || key === "D")
+    const upKeyPressed = (key === "w" || key === "W")
+    const downKeyPressed = (key === "s" || key === "S")
+    const leftKeyPressed = (key === "a" || key === "A")
+    const rightKeyPressed = (key === "d" || key === "D")
 
     if (upKeyPressed) { direction = directions.up }
     else if (leftKeyPressed) { direction = directions.left }
