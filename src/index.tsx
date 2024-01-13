@@ -791,10 +791,6 @@ const levels:Level[] = [
 const tileSize = 55
 const heroSize = tileSize / 1.5
 
-const imagesToBeLoaded = [
-  tilesetImg,
-]
-
 const createMoveEvent = (entity:MovableEntity, from:V2, to:V2) => {
   return {
     type: eventTypes.move,
@@ -1380,6 +1376,10 @@ const App = () => {
   }
 
   const preloadImages = async () => {
+    const imagesToBeLoaded = [
+      tilesetImg,
+    ]
+
     const imagePromises = imagesToBeLoaded.map(src => {
       return new Promise((resolve, reject) => {
         const img = new Image()
