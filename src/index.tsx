@@ -1733,6 +1733,20 @@ const App = () => {
             </div>
           )
         })}
+        <div
+          className={classnames("absolute border-t border-b border-blue-600/80 transition-opacity", {
+            "opacity-0": !state.teleportBeam.visible,
+            "opacity-100": state.teleportBeam.visible,
+          })}
+          style={{
+            borderTopWidth: 12,
+            left: state.teleportBeam.position.x,
+            top: state.teleportBeam.position.y,
+            transformOrigin: "left center",
+            transform: `translate(0%, -50%) rotate(${state.teleportBeam.rotation}deg)`,
+            width: `${state.teleportBeam.width}px`,
+          }}
+        ></div>
         {state.blocks.map((blockPosition, index) => {
           const position = getPosition(blockPosition, tileSize, tileSize)
 
@@ -1820,20 +1834,6 @@ const App = () => {
             })}
           </>
         )}
-        <div
-          className={classnames("absolute border-t border-b border-blue-600/80 transition-opacity", {
-            "opacity-0": !state.teleportBeam.visible,
-            "opacity-100": state.teleportBeam.visible,
-          })}
-          style={{
-            borderTopWidth: 12,
-            left: state.teleportBeam.position.x,
-            top: state.teleportBeam.position.y,
-            transformOrigin: "left center",
-            transform: `translate(0%, -50%) rotate(${state.teleportBeam.rotation}deg)`,
-            width: `${state.teleportBeam.width}px`,
-          }}
-        ></div>
         {state.heroes.map((hero, index) => {
           const heroPosition = getPosition(hero.position, heroSize, heroSize)
 
