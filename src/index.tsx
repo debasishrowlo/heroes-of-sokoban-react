@@ -68,6 +68,10 @@ type HeroEntity = {
 }
 
 type Level = {
+  textures?: {
+    surfaces: number[],
+    shadows: number[],
+  },
   popupMessage?: string,
   tilemap: Tilemap,
   tilesPerRow: number,
@@ -143,12 +147,17 @@ type V2 = {
 
 const levels:Level[] = [
   {
-    popupMessage: `Use W, A, S, D or arrow keys to move`,
+    popupMessage: `Use W, A, S, D keys to move`,
+    textures: {
+      surfaces: [1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 21, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 21, 21, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 21, 21, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 21, 31, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 34, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41],
+      shadows: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    },
     tilemap: [
       2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
       2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
       2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
       2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
+      2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
       2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
     ],
     tilesPerRow: 13,
@@ -161,12 +170,17 @@ const levels:Level[] = [
     goals: [{ x: 10, y: 2 }],
   },
   {
+    textures: {
+      surfaces: [1, 3, 3, 3, 23, 3, 3, 3, 23, 3, 3, 3, 4, 21, 6, 6, 6, 33, 6, 6, 6, 33, 6, 6, 6, 21, 21, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 21, 21, 6, 6, 6, 22, 6, 6, 6, 22, 6, 6, 6, 21, 31, 3, 3, 3, 32, 3, 3, 3, 32, 3, 3, 3, 34, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41],
+      shadows: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 30, 30, 0, 30, 30, 30, 0, 30, 30, 30, 0, 0, 0, 0, 0, 30, 0, 0, 0, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    },
     popupMessage: "Red warrior pushes blocks",
     tilemap: [
       2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
       2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2,
       2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
       2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2,
+      2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
       2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
     ],
     tilesPerRow: 13,
@@ -188,12 +202,17 @@ const levels:Level[] = [
     goals: [{ x: 10, y: 2 }],
   },
   {
+    textures: {
+      surfaces: [1, 3, 3, 3, 23, 3, 3, 3, 23, 3, 3, 3, 4, 21, 6, 6, 6, 33, 6, 6, 6, 21, 6, 6, 6, 21, 21, 6, 6, 6, 6, 6, 6, 6, 33, 6, 6, 6, 21, 21, 6, 6, 6, 22, 6, 6, 6, 6, 6, 6, 6, 21, 31, 3, 3, 3, 32, 3, 3, 3, 3, 3, 3, 3, 34, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41],
+      shadows: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 30, 30, 0, 30, 30, 30, 0, 30, 30, 30, 0, 0, 0, 0, 0, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    },
     popupMessage: "Hold down Switches to open doors",
     tilemap: [
       2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
       2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2,
       2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 2,
       2, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2,
+      2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
       2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
     ],
     tilesPerRow: 13,
@@ -218,6 +237,10 @@ const levels:Level[] = [
     goals: [{ x: 10, y: 2 }],
   },
   {
+    textures: {
+      surfaces: [1, 3, 3, 3, 3, 3, 23, 3, 4, 21, 6, 6, 6, 6, 6, 21, 6, 21, 21, 6, 15, 6, 6, 6, 33, 6, 21, 21, 6, 6, 6, 6, 6, 6, 6, 21, 21, 6, 6, 6, 6, 6, 6, 6, 21, 21, 6, 6, 6, 6, 6, 6, 6, 21, 21, 6, 6, 6, 6, 6, 6, 6, 21, 31, 3, 3, 3, 3, 3, 3, 3, 34, 41, 41, 41, 41, 41, 41, 41, 41, 41],
+      shadows: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 30, 30, 30, 30, 0, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 0, 0, 0, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    },
     popupMessage: "Press multiple switches at once",
     tilemap: [
       2, 2, 2, 2, 2, 2, 2, 2, 2,
@@ -227,6 +250,7 @@ const levels:Level[] = [
       2, 1, 1, 1, 1, 1, 1, 1, 2,
       2, 1, 1, 1, 1, 1, 1, 1, 2,
       2, 1, 1, 1, 1, 1, 1, 1, 2,
+      2, 2, 2, 2, 2, 2, 2, 2, 2,
       2, 2, 2, 2, 2, 2, 2, 2, 2,
     ],
     tilesPerRow: 9,
@@ -255,6 +279,10 @@ const levels:Level[] = [
     goals: [{ x: 7, y: 1 }],
   },
   {
+    textures: {
+      surfaces: [1, 3, 3, 3, 23, 3, 3, 3, 23, 3, 3, 3, 4, 21, 6, 6, 6, 33, 6, 6, 6, 21, 6, 6, 6, 21, 21, 6, 6, 6, 6, 6, 6, 6, 33, 6, 6, 6, 21, 21, 6, 6, 6, 22, 6, 6, 6, 6, 6, 6, 6, 21, 31, 3, 3, 3, 32, 3, 3, 3, 3, 3, 3, 3, 34, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41],
+      shadows: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 30, 30, 0, 30, 30, 30, 0, 30, 30, 30, 0, 0, 0, 0, 0, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    },
     popupMessage: "Green thief pulls blocks",
     tilemap: [
       2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
@@ -287,6 +315,10 @@ const levels:Level[] = [
     goals: [{ x: 10, y: 2 }],
   },
   {
+    textures: {
+      surfaces: [1, 3, 3, 3, 3, 3, 23, 3, 4, 21, 6, 6, 6, 6, 6, 21, 6, 21, 21, 6, 15, 6, 6, 6, 33, 6, 21, 21, 6, 6, 6, 6, 6, 6, 6, 21, 21, 6, 6, 6, 6, 6, 6, 6, 21, 21, 6, 6, 6, 6, 6, 6, 6, 21, 21, 6, 6, 6, 6, 6, 6, 6, 21, 31, 3, 3, 3, 3, 3, 3, 3, 34, 41, 41, 41, 41, 41, 41, 41, 41, 41],
+      shadows: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 30, 30, 30, 30, 0, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 0, 0, 0, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    },
     tilemap: [
       2, 2, 2, 2, 2, 2, 2, 2, 2,
       2, 1, 1, 1, 1, 1, 2, 1, 2,
@@ -295,6 +327,7 @@ const levels:Level[] = [
       2, 1, 1, 1, 1, 1, 1, 1, 2,
       2, 1, 1, 1, 1, 1, 1, 1, 2,
       2, 1, 1, 1, 1, 1, 1, 1, 2,
+      2, 2, 2, 2, 2, 2, 2, 2, 2,
       2, 2, 2, 2, 2, 2, 2, 2, 2,
     ],
     tilesPerRow: 9,
@@ -323,6 +356,10 @@ const levels:Level[] = [
     goals: [{ x: 7, y: 1 }],
   },
   {
+    textures: {
+      surfaces: [1, 3, 3, 3, 23, 23, 3, 3, 4, 21, 6, 6, 6, 33, 21, 6, 6, 21, 21, 6, 15, 6, 6, 31, 12, 6, 21, 21, 6, 6, 6, 6, 6, 6, 6, 21, 21, 6, 15, 6, 15, 6, 15, 6, 21, 21, 6, 6, 6, 6, 6, 6, 6, 21, 31, 3, 3, 3, 3, 3, 3, 3, 34, 41, 41, 41, 41, 41, 41, 41, 41, 41],
+      shadows: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 30, 30, 0, 0, 30, 30, 0, 0, 0, 0, 0, 30, 0, 0, 0, 0, 0, 0, 30, 0, 0, 30, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 0, 30, 0, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    },
     tilemap: [
       2, 2, 2, 2, 2, 2, 2, 2, 2,
       2, 1, 1, 1, 2, 2, 1, 1, 2,
@@ -448,7 +485,7 @@ const levels:Level[] = [
     goals: [{ x: 3, y: 1 }],
   },
   {
-    popupMessage: `Press "X" to switch heroes`,
+    popupMessage: `Press <span class="text-yellow-400">X</span> to switch heroes`,
     tilemap: [
       2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
       2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 
@@ -791,9 +828,13 @@ const levels:Level[] = [
 const tileSize = 55
 const heroSize = tileSize / 1.5
 
-const imagesToBeLoaded = [
-  tilesetImg,
-]
+const tileset = {
+  img: tilesetImg,
+  width: 64 * 10,
+  height: 64 * 6,
+  tileSize: 64,
+  texturesPerRow: 10,
+}
 
 const createMoveEvent = (entity:MovableEntity, from:V2, to:V2) => {
   return {
@@ -874,7 +915,7 @@ const getEntityOnTile = (state:State, level:Level, position:V2):Entity|null => {
 }
 
 const getTileValue = (level:Level, position:V2) => {
-  return level.tilemap[position.y * level.tilesPerRow + position.x]
+  return getValueFromPosition(level.tilemap, position, level.tilesPerRow)
 }
 
 const getNextTileInDirection = (position:V2, direction:directions, rows:number, cols:number):V2 => {
@@ -910,6 +951,17 @@ const getPosition = (position:V2, width:number, height:number):V2 => {
     x: (position.x * tileSize) + (tileSize / 2) - (width / 2),
     y: (position.y * tileSize) + (tileSize / 2) - (height / 2),
   }
+}
+
+const getPositionFromIndex = (index:number, itemsPerRow:number):V2 => {
+  return {
+    x: (index % itemsPerRow),
+    y: Math.floor(index / itemsPerRow),
+  }
+}
+
+const getValueFromPosition = (list:any[], position:V2, itemsPerRow:number) => {
+  return list[position.y * itemsPerRow + position.x]
 }
 
 const isGateOpen = (state:State, gateIndex:number):boolean => {
@@ -1072,10 +1124,10 @@ const App = () => {
 
     let direction:directions|null = null
 
-    const upKeyPressed = (key === "ArrowUp" || key === "w" || key === "W")
-    const downKeyPressed = (key === "ArrowDown" || key === "s" || key === "S")
-    const leftKeyPressed = (key === "ArrowLeft" || key === "a" || key === "A")
-    const rightKeyPressed = (key === "ArrowRight" || key === "d" || key === "D")
+    const upKeyPressed = (key === "w" || key === "W")
+    const downKeyPressed = (key === "s" || key === "S")
+    const leftKeyPressed = (key === "a" || key === "A")
+    const rightKeyPressed = (key === "d" || key === "D")
 
     if (upKeyPressed) { direction = directions.up }
     else if (leftKeyPressed) { direction = directions.left }
@@ -1380,6 +1432,10 @@ const App = () => {
   }
 
   const preloadImages = async () => {
+    const imagesToBeLoaded = [
+      tilesetImg,
+    ]
+
     const imagePromises = imagesToBeLoaded.map(src => {
       return new Promise((resolve, reject) => {
         const img = new Image()
@@ -1458,9 +1514,11 @@ const App = () => {
   const rows = getRows(level)
   const cols = level.tilesPerRow
 
+  const levelContainsTextures = level.textures
+
   return (
     <>
-      <div className="px-6 fixed top-0 right-0">
+      <div className="px-6 fixed z-10 top-0 right-0">
         <button
           type="button" 
           className="p-4 text-18 text-gray-100"
@@ -1469,7 +1527,7 @@ const App = () => {
           Levels
         </button>
       </div>
-      <div className="px-6 py-4 fixed bottom-0 left-0">
+      <div className="px-6 py-4 fixed z-10 bottom-0 left-0">
         <p className="text-18 text-gray-100">Z - Undo Move</p>
         <p className="mt-2 text-18 text-gray-100">R - Reset level</p>
       </div>
@@ -1484,18 +1542,6 @@ const App = () => {
           return (
             <div className="flex" key={`row-${index}`}>
               {Array.from(Array(cols).keys()).map((col, index) => {
-                let bgColor = "bg-transparent"
-                let borderColor = "border-transparent"
-
-                const tileset = {
-                  img: tilesetImg,
-                  width: 160,
-                  height: 80,
-                  tileSize: 16,
-                  wallTexture: { x: 4, y: 1 },
-                  floorTexture: { x: 5, y: 0 },
-                }
-
                 const scale = tileSize / tileset.tileSize
                 const bgTileSize = tileset.tileSize * scale
                 const bgSize = {
@@ -1503,35 +1549,43 @@ const App = () => {
                   y: scale * tileset.height,
                 }
 
-                let texturePosition:V2|null = null
+                let surfaceTextureIndex = null
 
-                const tileValue = getTileValue(level, { x: col, y: row })
-                if (tileValue === tileTypes.floor) {
-                  bgColor = "bg-gray-100"
-                  borderColor = "border-gray-300"
-                  texturePosition = { ...tileset.floorTexture }
-                } else if (tileValue === tileTypes.wall) {
-                  bgColor = "bg-gray-700"
-                  borderColor = "border-gray-700"
-                  texturePosition = { ...tileset.wallTexture }
+                if (level.textures) {
+                  surfaceTextureIndex = getValueFromPosition(level.textures.surfaces, { x: col, y: row }, level.tilesPerRow) - 1
+                } else {
+                  const tileValue = getTileValue(level, { x: col, y: row })
+
+                  const wallSurfaceIndex = 14
+                  const floorSurfaceIndex = 5
+
+                  const tileIsWall = tileValue === tileTypes.wall
+                  surfaceTextureIndex = tileIsWall ? wallSurfaceIndex : floorSurfaceIndex
                 }
 
-                const backgroundX = texturePosition.x * bgTileSize * -1
-                const backgroundY = texturePosition.y * bgTileSize * -1
-                const backgroundPosition = `${backgroundX}px ${backgroundY}px`
+                const surfaceTexturePosition = getPositionFromIndex(surfaceTextureIndex, tileset.texturesPerRow)
+                const surfaceBackgroundX = surfaceTexturePosition.x * bgTileSize * -1
+                const surfaceBackgroundY = surfaceTexturePosition.y * bgTileSize * -1
+
+                console.log({ surfaceTextureIndex })
 
                 return (
                   <div 
-                    className={`relative flex items-center justify-center ${borderColor} ${bgColor} text-white aspect-square`}
-                    style={{ 
+                    className={`relative flex items-center justify-center text-white aspect-square`}
+                    style={{
                       width: `${tileSize}px`,
-                      backgroundImage: `url(${tileset.img})`,
-                      backgroundSize: `${bgSize.x}px ${bgSize.y}px`,
-                      backgroundPosition,
                       fontSize: 10,
                     }}
                     key={`col-${index}`}
                   >
+                    <div 
+                      className="absolute w-full h-full"
+                      style={{
+                        backgroundImage: `url(${tileset.img})`,
+                        backgroundSize: `${bgSize.x}px ${bgSize.y}px`,
+                        backgroundPosition: `${surfaceBackgroundX}px ${surfaceBackgroundY}px`,
+                      }}
+                    ></div>
                   </div>
                 )
               })}
@@ -1541,13 +1595,6 @@ const App = () => {
         {level.goals.map((goalPosition, index) => {
           const mapPosition = getPosition(goalPosition, tileSize, tileSize)
 
-          const tileset = {
-            img: tilesetImg,
-            width: 160,
-            height: 80,
-            tileSize: 16,
-          }
-
           const scale = tileSize / tileset.tileSize
           const bgTileSize = tileset.tileSize * scale
           const bgSize = {
@@ -1555,12 +1602,11 @@ const App = () => {
             y: scale * tileset.height,
           }
 
-          const goalTexturePosition = { x: 9, y: 0 }
-          const texturePosition:V2|null = goalTexturePosition
+          const goalTextureIndex = 9
+          const texturePosition = getPositionFromIndex(goalTextureIndex, tileset.texturesPerRow)
 
           const backgroundX = texturePosition.x * bgTileSize * -1
           const backgroundY = texturePosition.y * bgTileSize * -1
-          const backgroundPosition = `${backgroundX}px ${backgroundY}px`
 
           return (
             <div
@@ -1578,7 +1624,7 @@ const App = () => {
                 style={{
                   backgroundImage: `url(${tileset.img})`,
                   backgroundSize: `${bgSize.x}px ${bgSize.y}px`,
-                  backgroundPosition,
+                  backgroundPosition: `${backgroundX}px ${backgroundY}px`,
                 }}
               >
               </div>
@@ -1704,13 +1750,6 @@ const App = () => {
         {state.blocks.map((blockPosition, index) => {
           const position = getPosition(blockPosition, tileSize, tileSize)
 
-          const tileset = {
-            img: tilesetImg,
-            width: 160,
-            height: 80,
-            tileSize: 16,
-          }
-
           const scale = tileSize / tileset.tileSize
           const bgTileSize = tileset.tileSize * scale
           const bgSize = {
@@ -1718,8 +1757,8 @@ const App = () => {
             y: scale * tileset.height,
           }
 
-          const blockTexturePosition = { x: 9, y: 1 }
-          const texturePosition:V2|null = blockTexturePosition
+          const blockTextureIndex = 19
+          const texturePosition = getPositionFromIndex(blockTextureIndex, tileset.texturesPerRow)
 
           const backgroundX = texturePosition.x * bgTileSize * -1
           const backgroundY = texturePosition.y * bgTileSize * -1
@@ -1748,6 +1787,53 @@ const App = () => {
             </div>
           )
         })}
+        {levelContainsTextures && (
+          <>
+            {Array.from(Array(rows).keys()).map((row, index) => {
+              return (
+                <div className="w-full h-full flex absolute top-0 left-0" key={`row-${index}`}>
+                  {Array.from(Array(cols).keys()).map((col, index) => {
+                    const shadowTextureIndex = getValueFromPosition(level.textures.shadows, { x: col, y: row }, level.tilesPerRow) - 1
+
+                    const tileHasShadow = shadowTextureIndex !== -1
+                    if (!tileHasShadow) {
+                      return null
+                    }
+
+                    const scale = tileSize / tileset.tileSize
+                    const bgTileSize = tileset.tileSize * scale
+                    const bgSize = {
+                      x: scale * tileset.width,
+                      y: scale * tileset.height,
+                    }
+
+                    const shadowTexturePosition = getPositionFromIndex(shadowTextureIndex, tileset.texturesPerRow)
+                    const shadowBackgroundX = shadowTexturePosition.x * bgTileSize * -1
+                    const shadowBackgroundY = shadowTexturePosition.y * bgTileSize * -1
+
+                    const tilePosition = getPosition({ x: col, y: row }, tileSize, tileSize)
+
+                    return (
+                      <div
+                        className="absolute aspect-square"
+                        id="shadow"
+                        style={{
+                          width: `${tileSize}px`,
+                          top: `${tilePosition.y}px`,
+                          left: `${tilePosition.x}px`,
+                          backgroundImage: `url(${tileset.img})`,
+                          backgroundSize: `${bgSize.x}px ${bgSize.y}px`,
+                          backgroundPosition: `${shadowBackgroundX}px ${shadowBackgroundY}px`,
+                        }}
+                        key={`col-${index}`}
+                      ></div>
+                    )
+                  })}
+                </div>
+              )
+            })}
+          </>
+        )}
         {state.heroes.map((hero, index) => {
           const heroPosition = getPosition(hero.position, heroSize, heroSize)
 
@@ -1774,7 +1860,7 @@ const App = () => {
       {state.popup.visible && (
         <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-10 py-14 border-2 border-white bg-gray-900 text-white rounded-lg shadow-md">
           <p className="text-24 text-center" dangerouslySetInnerHTML={{ __html: state.popup.message }}></p>
-          <p className="mt-10 text-18 text-center">Press "X" to Continue</p>
+          <p className="mt-10 text-18 text-center">Press <span className="text-yellow-400">X</span> to Continue</p>
         </div>
       )}
     </>
