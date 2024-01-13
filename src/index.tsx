@@ -1489,9 +1489,9 @@ const App = () => {
 
                 const tileset = {
                   img: tilesetImg,
-                  width: 160,
-                  height: 80,
-                  tileSize: 16,
+                  width: 64 * 10,
+                  height: 64 * 6,
+                  tileSize: 64,
                   wallTexture: { x: 4, y: 1 },
                   floorTexture: { x: 5, y: 0 },
                 }
@@ -1543,9 +1543,9 @@ const App = () => {
 
           const tileset = {
             img: tilesetImg,
-            width: 160,
-            height: 80,
-            tileSize: 16,
+            width: 64 * 10,
+            height: 64 * 6,
+            tileSize: 64,
           }
 
           const scale = tileSize / tileset.tileSize
@@ -1706,9 +1706,9 @@ const App = () => {
 
           const tileset = {
             img: tilesetImg,
-            width: 160,
-            height: 80,
-            tileSize: 16,
+            width: 64 * 10,
+            height: 64 * 6,
+            tileSize: 64,
           }
 
           const scale = tileSize / tileset.tileSize
