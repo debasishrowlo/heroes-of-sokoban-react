@@ -1527,6 +1527,9 @@ const App = () => {
           Levels
         </button>
       </div>
+      <div className="px-6 py-4 fixed z-10 top-0 left-0">
+        <p className="text-18 text-gray-100">Level - {state.levelIndex + 1}</p>
+      </div>
       <div className="px-6 py-4 fixed z-10 bottom-0 left-0">
         <p className="text-18 text-gray-100">Z - Undo Move</p>
         <p className="mt-2 text-18 text-gray-100">R - Reset level</p>
