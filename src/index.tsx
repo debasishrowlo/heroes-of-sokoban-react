@@ -5,6 +5,7 @@ import classnames from "classnames"
 import "./index.css"
 
 import tilesetImg from "./assets/tileset.png"
+import playerTilesetImg from "./assets/players.png"
 
 const enum entityTypes {
   hero = "hero",
@@ -147,7 +148,7 @@ type V2 = {
 
 const levels:Level[] = [
   {
-    popupMessage: `Use W, A, S, D keys to move`,
+    popupMessage: `Use <span class="text-yellow-400">W A S D</span> or <span class="text-yellow-400">arrow</span> keys to move`,
     textures: {
       surfaces: [1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 21, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 21, 21, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 21, 21, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 21, 31, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 34, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41],
       shadows: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -174,7 +175,7 @@ const levels:Level[] = [
       surfaces: [1, 3, 3, 3, 23, 3, 3, 3, 23, 3, 3, 3, 4, 21, 6, 6, 6, 33, 6, 6, 6, 33, 6, 6, 6, 21, 21, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 21, 21, 6, 6, 6, 22, 6, 6, 6, 22, 6, 6, 6, 21, 31, 3, 3, 3, 32, 3, 3, 3, 32, 3, 3, 3, 34, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41],
       shadows: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 30, 30, 0, 30, 30, 30, 0, 30, 30, 30, 0, 0, 0, 0, 0, 30, 0, 0, 0, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     },
-    popupMessage: "Red warrior pushes blocks",
+    popupMessage: "<span class='text-red-500'>Red warrior</span> pushes blocks",
     tilemap: [
       2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
       2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2,
@@ -283,7 +284,7 @@ const levels:Level[] = [
       surfaces: [1, 3, 3, 3, 23, 3, 3, 3, 23, 3, 3, 3, 4, 21, 6, 6, 6, 33, 6, 6, 6, 21, 6, 6, 6, 21, 21, 6, 6, 6, 6, 6, 6, 6, 33, 6, 6, 6, 21, 21, 6, 6, 6, 22, 6, 6, 6, 6, 6, 6, 6, 21, 31, 3, 3, 3, 32, 3, 3, 3, 3, 3, 3, 3, 34, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41],
       shadows: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 30, 30, 0, 30, 30, 30, 0, 30, 30, 30, 0, 0, 0, 0, 0, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     },
-    popupMessage: "Green thief pulls blocks",
+    popupMessage: "<span class='text-green-500'>Green thief</span> pulls blocks",
     tilemap: [
       2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
       2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2,
@@ -395,7 +396,7 @@ const levels:Level[] = [
       surfaces: [1, 3, 3, 3, 3, 3, 3, 3, 23, 3, 3, 3, 4, 21, 6, 6, 6, 6, 6, 6, 6, 33, 6, 6, 6, 21, 21, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 21, 21, 6, 6, 6, 22, 6, 6, 6, 22, 6, 6, 6, 21, 31, 3, 3, 3, 32, 3, 3, 3, 32, 3, 3, 3, 34, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41],
       shadows: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 30, 30, 30, 30, 30, 30, 0, 30, 30, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     },
-    popupMessage: "Blue Wizard teleports to blocks",
+    popupMessage: "<span class='text-blue-500'>Blue Wizard</span> teleports to blocks",
     tilemap: [
       2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
       2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 2,
@@ -875,7 +876,8 @@ const levels:Level[] = [
 ]
 
 const tileSize = 55
-const heroSize = tileSize / 1.5
+const heroWidth = tileSize
+const heroHeight = tileSize * 2
 
 const tileset = {
   img: tilesetImg,
@@ -883,6 +885,15 @@ const tileset = {
   height: 64 * 6,
   tileSize: 64,
   texturesPerRow: 10,
+}
+
+const playerTilesetTileSize = 64
+const playerTileset = {
+  img: playerTilesetImg,
+  width: playerTilesetTileSize * 3,
+  height: playerTilesetTileSize * 2,
+  tileSize: playerTilesetTileSize,
+  texturesPerRow: 3,
 }
 
 const createMoveEvent = (entity:MovableEntity, from:V2, to:V2) => {
@@ -1128,6 +1139,7 @@ const App = () => {
 
     const zKeyPressed = key === "z" || key === "Z"
     const turnsAvailableToUndo = newState.turns.length > 0
+
     if (zKeyPressed && turnsAvailableToUndo) {
       const previousTurnEvents = newState.turns[newState.turns.length - 1]
 
@@ -1173,10 +1185,10 @@ const App = () => {
 
     let direction:directions|null = null
 
-    const upKeyPressed = (key === "w" || key === "W")
-    const downKeyPressed = (key === "s" || key === "S")
-    const leftKeyPressed = (key === "a" || key === "A")
-    const rightKeyPressed = (key === "d" || key === "D")
+    const upKeyPressed = (key === "ArrowUp" || key === "w" || key === "W")
+    const downKeyPressed = (key === "ArrowDown" || key === "s" || key === "S")
+    const leftKeyPressed = (key === "ArrowLeft" || key === "a" || key === "A")
+    const rightKeyPressed = (key === "ArrowRight" || key === "d" || key === "D")
 
     if (upKeyPressed) { direction = directions.up }
     else if (leftKeyPressed) { direction = directions.left }
@@ -1483,6 +1495,7 @@ const App = () => {
   const preloadImages = async () => {
     const imagesToBeLoaded = [
       tilesetImg,
+      playerTilesetImg,
     ]
 
     const imagePromises = imagesToBeLoaded.map(src => {
@@ -1550,10 +1563,10 @@ const App = () => {
 
   if (state.gameStatus === gameStatuses.win) {
     return (
-      <div className="fixed w-full h-full flex items-center justify-center">
+      <div className="fixed z-50 w-full h-full flex items-center justify-center">
         <div className="px-20 py-20 flex-col border border-white rounded-xl">
           <p className="text-center text-28 text-white">Thank you for playing</p>
-          <p className="mt-14 text-center text-20 text-white">Press "x" to continue</p>
+          <p className="mt-14 text-center text-20 text-white">Press <span className="text-yellow-400">X</span> to continue</p>
         </div>
       </div>
     )
@@ -1567,7 +1580,7 @@ const App = () => {
 
   return (
     <>
-      <div className="px-6 fixed z-10 top-0 right-0">
+      <div className="px-6 fixed z-50 top-0 right-0">
         <button
           type="button" 
           className="p-4 text-18 text-gray-100"
@@ -1576,10 +1589,10 @@ const App = () => {
           Levels
         </button>
       </div>
-      <div className="px-6 py-4 fixed z-10 top-0 left-0">
+      <div className="px-6 py-4 fixed z-50 top-0 left-0">
         <p className="text-18 text-gray-100">Level - {state.levelIndex + 1}</p>
       </div>
-      <div className="px-6 py-4 fixed z-10 bottom-0 left-0">
+      <div className="px-6 py-4 fixed z-50 bottom-0 left-0">
         <p className="text-18 text-gray-100">Z - Undo Move</p>
         <p className="mt-2 text-18 text-gray-100">R - Reset level</p>
       </div>
@@ -1618,8 +1631,6 @@ const App = () => {
                 const surfaceTexturePosition = getPositionFromIndex(surfaceTextureIndex, tileset.texturesPerRow)
                 const surfaceBackgroundX = surfaceTexturePosition.x * bgTileSize * -1
                 const surfaceBackgroundY = surfaceTexturePosition.y * bgTileSize * -1
-
-                console.log({ surfaceTextureIndex })
 
                 return (
                   <div 
@@ -1887,30 +1898,57 @@ const App = () => {
           </>
         )}
         {state.heroes.map((hero, index) => {
-          const heroPosition = getPosition(hero.position, heroSize, heroSize)
-
+          const heroPosition = {
+            x: (hero.position.x * tileSize) + (tileSize / 2) - (heroWidth / 2),
+            y: (hero.position.y * tileSize) - tileSize,
+          }
           const isActive = index === state.activeHeroIndex
 
+          let playerTextureIndex = null
+          if (hero.type === heroTypes.warrior) {
+            playerTextureIndex = 0
+          } else if (hero.type === heroTypes.thief) {
+            playerTextureIndex = 1
+          } else if (hero.type === heroTypes.wizard) {
+            playerTextureIndex = 2
+          }
+
+          const tileset = playerTileset
+          const scale = tileSize / tileset.tileSize
+          const bgTileSize = tileset.tileSize * scale
+          const bgSize = {
+            x: scale * tileset.width,
+            y: scale * tileset.height,
+          }
+
+          const texturePosition = getPositionFromIndex(playerTextureIndex, tileset.texturesPerRow)
+          const backgroundX = texturePosition.x * bgTileSize * -1
+          const backgroundY = texturePosition.y * bgTileSize * -1
+
+          const zIndex = 5 + hero.position.y
+
           return (
-            <div 
+            <div
               key={`hero-${index}`}
-              className={classnames("absolute aspect-square rounded-full transition-all", {
+              className={classnames("absolute rounded-full transition-all", {
                 "brightness-50": !isActive,
-                "bg-red-600": hero.type === heroTypes.warrior,
-                "bg-green-600": hero.type === heroTypes.thief,
-                "bg-blue-600": hero.type === heroTypes.wizard,
               })}
               style={{
-                width: `${heroSize}px`,
+                width: `${heroWidth}px`,
+                height: `${heroHeight}px`,
                 left: `${heroPosition.x}px`,
                 top: `${heroPosition.y}px`,
+                backgroundImage: `url(${tileset.img})`,
+                backgroundSize: `${bgSize.x}px ${bgSize.y}px`,
+                backgroundPosition: `${backgroundX}px ${backgroundY}px`,
+                zIndex,
               }}
             />
           )
         })}
       </div>
       {state.popup.visible && (
-        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-10 py-14 border-2 border-white bg-gray-900 text-white rounded-lg shadow-md">
+        <div className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-10 py-14 border-2 border-white bg-gray-900 text-white rounded-lg shadow-md">
           <p className="text-24 text-center" dangerouslySetInnerHTML={{ __html: state.popup.message }}></p>
           <p className="mt-10 text-18 text-center">Press <span className="text-yellow-400">X</span> to Continue</p>
         </div>
