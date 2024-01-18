@@ -887,13 +887,12 @@ const tileset = {
   texturesPerRow: 10,
 }
 
-const playerTilesetTileSize = 64
 const playerTileset = {
   img: playerTilesetImg,
-  width: playerTilesetTileSize * 3,
-  height: playerTilesetTileSize * 2,
-  tileSize: playerTilesetTileSize,
-  texturesPerRow: 3,
+  width: 64 * 8,
+  height: 64 * 12,
+  tileSize: 64,
+  texturesPerRow: 6,
 }
 
 const createMoveEvent = (entity:MovableEntity, from:V2, to:V2) => {
@@ -1013,10 +1012,10 @@ const getPosition = (position:V2, width:number, height:number):V2 => {
   }
 }
 
-const getPositionFromIndex = (index:number, itemsPerRow:number):V2 => {
+const getPositionFromIndex = (index:number, itemsPerRow:number, itemHeight:number = 1):V2 => {
   return {
     x: (index % itemsPerRow),
-    y: Math.floor(index / itemsPerRow),
+    y: Math.floor((index * itemHeight) / itemsPerRow),
   }
 }
 
@@ -1908,9 +1907,9 @@ const App = () => {
           if (hero.type === heroTypes.warrior) {
             playerTextureIndex = 0
           } else if (hero.type === heroTypes.thief) {
-            playerTextureIndex = 1
+            playerTextureIndex = 12
           } else if (hero.type === heroTypes.wizard) {
-            playerTextureIndex = 2
+            playerTextureIndex = 24
           }
 
           const tileset = playerTileset
@@ -1921,16 +1920,24 @@ const App = () => {
             y: scale * tileset.height,
           }
 
-          const texturePosition = getPositionFromIndex(playerTextureIndex, tileset.texturesPerRow)
+          const texturePosition = getPositionFromIndex(playerTextureIndex, tileset.texturesPerRow, 2)
           const backgroundX = texturePosition.x * bgTileSize * -1
           const backgroundY = texturePosition.y * bgTileSize * -1
 
           const zIndex = 5 + hero.position.y
 
+          let animation = ""
+
+          if (isActive) {
+            if (hero.type === heroTypes.warrior) {
+              animation = "warrior__idle"
+            }
+          }
+
           return (
             <div
               key={`hero-${index}`}
-              className={classnames("absolute rounded-full transition-all", {
+              className={classnames(`${animation} absolute rounded-full transition-all`, {
                 "brightness-50": !isActive,
               })}
               style={{

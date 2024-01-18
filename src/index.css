@@ -9,3 +9,21 @@ body {
 .disable-transitions * {
     transition: none !important;
 }
+
+@keyframes warrior__idle-animation {
+    0% { background-position: 0px 0px; }
+    100% { background-position: -440px 0px; }
+}
+
+.warrior__idle {
+    animation: warrior__idle-animation 1.2s steps(8) infinite;
+}
+
+@keyframes thief__idle-animation {
+    0% { background-position: 0px -220px; }
+    100% { background-position: -440px -220px; }
+}
+
+.thief__idle {
+    animation: thief__idle-animation 1.2s steps(8) infinite;
+}
