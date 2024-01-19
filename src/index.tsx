@@ -1461,13 +1461,14 @@ const App = () => {
     setState(newState)
     if (newState.teleportBeam.visible) {
       setTimeout(() => {
-        setState({
+        const stateWithTeleportBeamHidden = {
           ...newState,
           teleportBeam: {
             ...newState.teleportBeam, 
             visible: false,
           },
-        })
+        }
+        setState({ ...stateWithTeleportBeamHidden })
       }, 150)
     }
   }
@@ -1931,6 +1932,10 @@ const App = () => {
           if (isActive) {
             if (hero.type === heroTypes.warrior) {
               animation = "warrior__idle"
+            } else if (hero.type === heroTypes.thief) {
+              animation = "thief__idle"
+            } else if (hero.type === heroTypes.wizard) {
+              animation = "wizard__idle"
             }
           }
 
