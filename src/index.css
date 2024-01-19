@@ -27,3 +27,12 @@ body {
 .thief__idle {
     animation: thief__idle-animation 1.2s steps(8) infinite;
 }
+
+@keyframes wizard__idle-animation {
+    0% { background-position: 0px -440px; }
+    100% { background-position: -440px -440px; }
+}
+
+.wizard__idle {
+    animation: wizard__idle-animation 1.2s steps(8) infinite;
+}
