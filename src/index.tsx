@@ -119,6 +119,7 @@ type State = {
   heroes: Array<{
     type: heroTypes,
     position: V2,
+    direction: directions.left | directions.right,
   }>,
   activeHeroIndex: number,
   margin: {
@@ -928,7 +929,10 @@ const generateLevel = (index:number):State => {
       position: { x: 0, y: 0 },
       rotation: 0,
     },
-    heroes: level.heroes.map(hero => ({ ...hero })),
+    heroes: level.heroes.map(hero => ({ 
+      ...hero,
+      direction: directions.right,
+    })),
     activeHeroIndex: 0,
     blocks: level.blocks ? level.blocks.map(position => ({ ...position })) : [],
     switchGates: level.switchGates ? level.switchGates : [],
@@ -1050,14 +1054,24 @@ const isGateOpen = (state:State, gateIndex:number):boolean => {
   return isOpen
 }
 
-const moveHero = (state:State, heroIndex:number, position:V2):State => {
+const moveHero = (state:State, heroIndex:number, newPosition:V2):State => {
+  const hero = state.heroes[heroIndex]
+  let direction = hero.direction 
+  
+  if (newPosition.x < hero.position.x) {
+    direction = directions.left
+  } else if (newPosition.x > hero.position.x) {
+    direction = directions.right
+  }
+
   return {
     ...state,
     heroes: [
       ...state.heroes.slice(0, heroIndex),
       {
         ...state.heroes[heroIndex],
-        position: { ...position },
+        position: { ...newPosition },
+        direction,
       },
       ...state.heroes.slice(heroIndex + 1),
     ],
@@ -2028,12 +2042,21 @@ const App = () => {
                 height: `${heroHeight}px`,
                 left: `${heroPosition.x}px`,
                 top: `${heroPosition.y}px`,
-                backgroundImage: `url(${tileset.img})`,
-                backgroundSize: `${bgSize.x}px ${bgSize.y}px`,
-                backgroundPosition: `${backgroundX}px ${backgroundY}px`,
                 zIndex,
               }}
-            />
+            >
+              <div 
+                className={classnames("w-full h-full", {
+                  "-scale-x-100": hero.direction === directions.left,
+                })}
+                style={{
+                  backgroundImage: `url(${tileset.img})`,
+                  backgroundSize: `${bgSize.x}px ${bgSize.y}px`,
+                  backgroundPosition: `${backgroundX}px ${backgroundY}px`,
+                }}
+              >
+              </div>
+            </div>
           )
         })}
       </div>
