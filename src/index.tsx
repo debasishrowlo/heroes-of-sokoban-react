@@ -1274,28 +1274,28 @@ const App = () => {
     let newState:State = { ...state }
     const events:Event[] = []
 
-    const level = levels[newState.levelIndex]
+    const level = levels[state.levelIndex]
     const rows = getRows(level)
     const cols = level.tilesPerRow
-    const hero = newState.heroes[newState.activeHeroIndex]
+    const hero = state.heroes[state.activeHeroIndex]
 
     if (hero.type === heroTypes.warrior) {
       let entitiesToBeMoved:Array<Entity> = [
         {
           type: entityTypes.hero,
-          index: newState.activeHeroIndex,
+          index: state.activeHeroIndex,
         },
       ]
 
       let nextPosition = getNextTileInDirection(hero.position, direction, rows, cols)
       while (true) {
-        const entityOnTile = getEntityOnTile(newState, level, nextPosition)
+        const entityOnTile = getEntityOnTile(state, level, nextPosition)
 
         const tileIsEmpty = entityOnTile === null
         if (tileIsEmpty) { break }
 
         const tileContainsGate = entityOnTile.type === entityTypes.gate
-        const tileGateOpen = tileContainsGate ? isGateOpen(newState, entityOnTile.index) : false
+        const tileGateOpen = tileContainsGate ? isGateOpen(state, entityOnTile.index) : false
         const tileContainsOpenGate = tileContainsGate && tileGateOpen
         if (tileContainsOpenGate) { break }
 
@@ -1321,25 +1321,25 @@ const App = () => {
         const tileContainsBlock = entity.type === entityTypes.block
 
         if (tileContainsHero) {
-          const hero = newState.heroes[entity.index]
+          const hero = state.heroes[entity.index]
           const nextPosition = getNextTileInDirection(hero.position, direction, rows, cols)
           events.push(createMoveEvent(entity, hero.position, nextPosition))
         } else if (tileContainsBlock) {
-          const blockPosition = newState.blocks[entity.index]
+          const blockPosition = state.blocks[entity.index]
           const nextPosition = getNextTileInDirection(blockPosition, direction, rows, cols)
           events.push(createMoveEvent(entity, blockPosition, nextPosition))
         }
       }
     } else if (hero.type === heroTypes.thief) {
       const nextPosition = getNextTileInDirection(hero.position, direction, rows, cols)
-      const entityOnTile = getEntityOnTile(newState, level, nextPosition)
+      const entityOnTile = getEntityOnTile(state, level, nextPosition)
 
       const tileIsEmpty = entityOnTile === null
       const tileContainsGate = entityOnTile && entityOnTile.type === entityTypes.gate
-      const tileContainsOpenGate = tileContainsGate && isGateOpen(newState, entityOnTile.index)
+      const tileContainsOpenGate = tileContainsGate && isGateOpen(state, entityOnTile.index)
       const tileCanBeOccupied = tileIsEmpty || tileContainsOpenGate
       if (tileCanBeOccupied) {
-        const currentPosition = newState.heroes[newState.activeHeroIndex].position
+        const currentPosition = state.heroes[state.activeHeroIndex].position
 
         let oppositeDirection:directions = null
         if (direction === directions.up) {
@@ -1353,22 +1353,22 @@ const App = () => {
         }
 
         const oppositePosition = getNextTileInDirection(currentPosition, oppositeDirection, rows, cols)
-        const entityOnOppositeTile = getEntityOnTile(newState, level, oppositePosition)
+        const entityOnOppositeTile = getEntityOnTile(state, level, oppositePosition)
 
         const oppositeTileContainsBlock = entityOnOppositeTile && entityOnOppositeTile.type === entityTypes.block
         if (oppositeTileContainsBlock) {
-          const blockPosition = newState.blocks[entityOnOppositeTile.index]
+          const blockPosition = state.blocks[entityOnOppositeTile.index]
           events.push(createMoveEvent(entityOnOppositeTile, blockPosition, currentPosition))
         }
 
         const oppositeTileContainsHero = entityOnOppositeTile && entityOnOppositeTile.type === entityTypes.hero
         if (oppositeTileContainsHero) {
-          const heroPosition = newState.heroes[entityOnOppositeTile.index].position
+          const heroPosition = state.heroes[entityOnOppositeTile.index].position
           events.push(createMoveEvent(entityOnOppositeTile, heroPosition, currentPosition))
         }
 
-        const heroPosition = newState.heroes[newState.activeHeroIndex].position
-        const heroEntity:HeroEntity = { type: entityTypes.hero, index: newState.activeHeroIndex }
+        const heroPosition = state.heroes[state.activeHeroIndex].position
+        const heroEntity:HeroEntity = { type: entityTypes.hero, index: state.activeHeroIndex }
         events.push(createMoveEvent(heroEntity, heroPosition, nextPosition))
       }
     } else if (hero.type === heroTypes.wizard) {
@@ -1376,10 +1376,10 @@ const App = () => {
 
       let currentPosition = getNextTileInDirection(hero.position, direction, rows, cols)
       while(true) {
-        const entityOnTile = getEntityOnTile(newState, level, currentPosition)
+        const entityOnTile = getEntityOnTile(state, level, currentPosition)
 
         if (entityOnTile) {
-          if (tileContainsImmovableEntity(newState, entityOnTile)) { break }
+          if (tileContainsImmovableEntity(state, entityOnTile)) { break }
 
           if (tileContainsMovableEntity(entityOnTile)) {
             entity = entityOnTile as MovableEntity
@@ -1400,11 +1400,11 @@ const App = () => {
         const tileContainsHero = entityToSwap.type === entityTypes.hero
 
         if (tileContainsBlock) {
-          const heroIndex = newState.activeHeroIndex
+          const heroIndex = state.activeHeroIndex
           const heroPosition = { ...hero.position }
 
           const blockIndex = entityToSwap.index
-          const blockPosition = newState.blocks[blockIndex]
+          const blockPosition = state.blocks[blockIndex]
 
           const heroEntity:HeroEntity = { type: entityTypes.hero, index: heroIndex }
           const blockEntity:BlockEntity = { type: entityTypes.block, index: blockIndex }
@@ -1419,11 +1419,11 @@ const App = () => {
             endPosition = { ...heroPosition }
           }
         } else if (tileContainsHero) {
-          const wizardIndex = newState.activeHeroIndex
+          const wizardIndex = state.activeHeroIndex
           const wizardPosition = { ...hero.position }
 
           const heroIndex = entityToSwap.index
-          const heroPosition = newState.heroes[heroIndex].position
+          const heroPosition = state.heroes[heroIndex].position
 
           const wizardEntity:HeroEntity = { type: entityTypes.hero, index: wizardIndex }
           const heroEntity:HeroEntity = { type: entityTypes.hero, index: heroIndex }
@@ -1471,14 +1471,14 @@ const App = () => {
         }
       } else {
         const nextPosition = getNextTileInDirection(hero.position, direction, rows, cols)
-        const entityOnTile = getEntityOnTile(newState, level, nextPosition)
+        const entityOnTile = getEntityOnTile(state, level, nextPosition)
 
         const tileIsEmpty = entityOnTile === null
 
-        if (tileIsEmpty || !tileContainsImmovableEntity(newState, entityOnTile)) {
+        if (tileIsEmpty || !tileContainsImmovableEntity(state, entityOnTile)) {
           const heroEntity:HeroEntity = {
             type: entityTypes.hero,
-            index: newState.activeHeroIndex,
+            index: state.activeHeroIndex,
           }
           const currentPosition = { ...hero.position }
           events.push(createMoveEvent(heroEntity, currentPosition, nextPosition))
