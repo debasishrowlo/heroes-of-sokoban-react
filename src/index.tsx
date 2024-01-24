@@ -1034,6 +1034,40 @@ const getValueFromPosition = (list:any[], position:V2, itemsPerRow:number) => {
   return list[position.y * itemsPerRow + position.x]
 }
 
+const handleUndo = (state:State):State => {
+  const previousTurnEvents = state.turns[state.turns.length - 1]
+
+  let newState = { ...state }
+
+  previousTurnEvents.forEach(event => {
+    let reversedEvent = null
+
+    if (event.type === eventTypes.move) {
+      reversedEvent = {
+        ...event,
+        from: { ...event.to },
+        to: { ...event.from },
+      }
+    } else if (event.type === eventTypes.switchHero) {
+      reversedEvent = {
+        ...event,
+        previousActiveHeroIndex: event.nextActiveHeroIndex,
+        nextActiveHeroIndex: event.previousActiveHeroIndex,
+      }
+    }
+
+    newState = processEvent(newState, reversedEvent)
+  })
+
+  const turnsWithoutCurrentTurn = newState.turns.slice(0, -1)
+  newState = {
+    ...newState,
+    turns: turnsWithoutCurrentTurn,
+  }
+
+  return newState
+}
+
 const isGateOpen = (state:State, gateIndex:number):boolean => {
   const gate = state.switchGates[gateIndex]
 
@@ -1121,6 +1155,30 @@ const processEvent = (state:State, event:Event):State => {
   return newState
 }
 
+const switchHero = (state:State):State => {
+  const currentActiveHeroIndex = state.activeHeroIndex
+  const nextActiveHeroIndex = (state.activeHeroIndex + 1) % state.heroes.length
+
+  const switchHeroEvent:SwitchHeroEvent = {
+    type: eventTypes.switchHero,
+    previousActiveHeroIndex: currentActiveHeroIndex,
+    nextActiveHeroIndex: nextActiveHeroIndex,
+  }
+
+  let newState:State = { ...state }
+
+  newState = processEvent(state, switchHeroEvent)
+  newState = {
+    ...newState,
+    turns: [
+      ...newState.turns,
+      [switchHeroEvent],
+    ],
+  }
+
+  return newState
+}
+
 const tileContainsImmovableEntity = (state:State, entity:Entity):boolean => {
   const tileContainsWall = entity.type === entityTypes.wall
   const tileContainsGate = entity.type === entityTypes.gate
@@ -1139,7 +1197,7 @@ const v2Equal = (p1:V2, p2:V2) => {
   return p1.x === p2.x && p1.y === p2.y
 }
 
-const xKeyPressed = (key:KeyboardEvent["key"]) => {
+const isXKeyPressed = (key:KeyboardEvent["key"]) => {
   return key === "x" || key === "X"
 }
 
@@ -1152,120 +1210,53 @@ const App = () => {
 
     if (!state) { return }
 
-    if (
-      state.gameStatus === gameStatuses.loading ||
-      state.gameStatus === gameStatuses.paused
-    ) {
+    const gameIsLoading = state.gameStatus === gameStatuses.loading
+    const gameIsPaused = state.gameStatus === gameStatuses.paused
+
+    if (gameIsLoading || gameIsPaused) {
       return
     }
 
-    if (state.gameStatus === gameStatuses.win) {
-      if (xKeyPressed(key)) {
-        showLevelSelect()
-      }
+    const gameOver = state.gameStatus === gameStatuses.win
+    const xKeyPressed = isXKeyPressed(key)
+
+    if (gameOver && xKeyPressed) {
+      showLevelSelect()
       return
     }
 
-    if (state.popup.visible) {
-      if (xKeyPressed(key)) {
-        const stateWithPopupHidden = {
-          ...state,
-          popup: {
-            ...state.popup,
-            visible: false,
-          },
-        }
-        setState({ ...stateWithPopupHidden })
-      }
+    const popupVisible = state.popup.visible
+
+    if (popupVisible && xKeyPressed) {
+      hidePopup()
       return
     }
 
     const zKeyPressed = key === "z" || key === "Z"
     const userPressedUndoButton = zKeyPressed
+    const turnsAvailableToUndo = state.turns.length > 0
 
-    if (userPressedUndoButton) {
-      const noTurnsAvailableToUndo = state.turns.length === 0
-
-      if (noTurnsAvailableToUndo) {
-        return
-      }
-
-      let newState = { ...state }
-
-      const previousTurnEvents = newState.turns[newState.turns.length - 1]
-
-      for (let i = 0; i < previousTurnEvents.length; i++) {
-        const event = previousTurnEvents[i]
-
-        let reversedEvent = null
-
-        if (event.type === eventTypes.move) {
-          reversedEvent = {
-            ...event,
-            from: { ...event.to },
-            to: { ...event.from },
-          }
-        } else if (event.type === eventTypes.switchHero) {
-          reversedEvent = {
-            ...event,
-            previousActiveHeroIndex: event.nextActiveHeroIndex,
-            nextActiveHeroIndex: event.previousActiveHeroIndex,
-          }
-        }
-
-        newState = processEvent(newState, reversedEvent)
-      }
-
-      const turnsWithoutCurrentTurn = newState.turns.slice(0, -1)
-      newState = {
-        ...newState,
-        turns: turnsWithoutCurrentTurn,
-      }
-
+    if (userPressedUndoButton && turnsAvailableToUndo) {
+      const newState = handleUndo(state)
       setState({ ...newState })
       return
     }
 
     const rKeyPressed = key === "r" || key === "R"
-    const userPressedResetButton = rKeyPressed
+    const resetButtonPressed = rKeyPressed
 
-    if (userPressedResetButton) {
+    if (resetButtonPressed) {
       pauseTransitions(150)
       loadLevel(state.levelIndex)
       return
     }
 
-    const userPressedSwitchHeroButton = xKeyPressed(key)
+    const switchHeroButtonPressed = xKeyPressed
+    const levelHasMultipleHeroes = levels[state.levelIndex].heroes.length > 0
 
-    if (userPressedSwitchHeroButton) {
-      const levelHasMultipleHeroes = levels[state.levelIndex].heroes.length > 0
-
-      if (!levelHasMultipleHeroes) {
-        return
-      }
-
-      const currentActiveHeroIndex = state.activeHeroIndex
-      const nextActiveHeroIndex = (state.activeHeroIndex + 1) % state.heroes.length
-
-      const switchHeroEvent:SwitchHeroEvent = {
-        type: eventTypes.switchHero,
-        previousActiveHeroIndex: currentActiveHeroIndex,
-        nextActiveHeroIndex: nextActiveHeroIndex,
-      }
-
-      let newState:State = { ...state }
-
-      newState = processEvent(state, switchHeroEvent)
-      newState = {
-        ...newState,
-        turns: [
-          ...newState.turns,
-          [switchHeroEvent],
-        ],
-      }
-
+    if (switchHeroButtonPressed && levelHasMultipleHeroes) {
+      const newState = switchHero(state)
       setState(newState)
-
       return
     }
 
@@ -1578,6 +1569,16 @@ const App = () => {
         },
       })
     }
+  }
+
+  const hidePopup = () => {
+    setState({
+      ...state,
+      popup: {
+        ...state.popup,
+        visible: false,
+      },
+    })
   }
 
   const loadLevel = (index:number) => {
