@@ -10,6 +10,15 @@ body {
     transition: none !important;
 }
 
+@keyframes warrior__walk-animation {
+    0% { background-position: 0px -110px; }
+    100% { background-position: -330px -110px; }
+}
+
+.warrior__walk {
+    animation: warrior__walk-animation 500ms steps(6) infinite;
+}
+
 @keyframes warrior__idle-animation {
     0% { background-position: 0px 0px; }
     100% { background-position: -440px 0px; }
