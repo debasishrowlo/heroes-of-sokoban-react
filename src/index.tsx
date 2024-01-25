@@ -7,6 +7,8 @@ import "./index.css"
 import tilesetImg from "./assets/tileset.png"
 import playerTilesetImg from "./assets/players.png"
 
+const heroWalkDuration = 150
+
 const enum entityTypes {
   hero = "hero",
   block = "block",
@@ -31,6 +33,11 @@ const enum gameStatuses {
   playing = "playing",
   paused = "paused",
   win = "win",
+}
+
+const enum heroStates {
+  idle = "idle",
+  walking = "walking",
 }
 
 const enum heroTypes {
@@ -120,6 +127,7 @@ type State = {
     type: heroTypes,
     position: V2,
     direction: directions.left | directions.right,
+    state: heroStates,
   }>,
   activeHeroIndex: number,
   margin: {
@@ -881,6 +889,62 @@ const levels:Level[] = [
   //     { x: 4, y: 5 },
   //   ],
   // },
+  {
+    textures: {
+      surfaces: [1, 3, 3, 3, 23, 3, 3, 3, 23, 3, 3, 3, 4, 21, 6, 6, 6, 33, 6, 6, 6, 33, 6, 6, 6, 21, 21, 6, 15, 6, 6, 6, 15, 6, 6, 6, 15, 6, 21, 21, 6, 6, 6, 22, 6, 6, 6, 22, 6, 6, 6, 21, 11, 3, 3, 3, 2, 12, 6, 13, 2, 23, 23, 23, 14, 21, 6, 6, 6, 33, 6, 6, 6, 31, 32, 32, 32, 14, 21, 6, 15, 6, 6, 6, 15, 6, 6, 6, 6, 6, 21, 21, 6, 6, 6, 22, 6, 6, 6, 1, 23, 23, 23, 14, 21, 3, 3, 3, 2, 12, 6, 13, 2, 32, 32, 32, 14, 21, 6, 6, 6, 33, 6, 6, 6, 33, 6, 6, 6, 21, 21, 6, 6, 6, 6, 6, 15, 6, 6, 6, 15, 6, 21, 21, 6, 6, 6, 22, 6, 6, 6, 22, 6, 6, 6, 21, 31, 3, 3, 3, 32, 3, 3, 3, 32, 3, 3, 3, 34, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41, 41],
+      shadows: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 30, 30, 0, 30, 30, 30, 0, 30, 30, 30, 0, 0, 0, 0, 0, 30, 0, 0, 0, 30, 0, 0, 0, 0, 0, 0, 30, 0, 0, 0, 30, 0, 0, 0, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 30, 30, 0, 30, 0, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 0, 0, 0, 30, 30, 30, 30, 0, 0, 0, 30, 0, 0, 0, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 30, 30, 0, 30, 0, 30, 0, 30, 30, 30, 0, 0, 0, 0, 0, 30, 0, 0, 0, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 0, 0, 0, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    },
+    tilemap: [
+      2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+      2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2,
+      2, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 2,
+      2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2,
+      2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2,
+      2, 1, 1, 1, 2, 1, 1, 1, 2, 2, 2, 2, 2,
+      2, 1, 2, 1, 1, 1, 2, 1, 1, 1, 1, 1, 2,
+      2, 1, 1, 1, 2, 1, 1, 1, 2, 2, 2, 2, 2,
+      2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2,
+      2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2,
+      2, 1, 1, 1, 1, 1, 2, 1, 1, 1, 2, 1, 2,
+      2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2,
+      2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+    ],
+    tilesPerRow: 13,
+    blocks: [
+      { x: 4, y: 2 },
+      { x: 8, y: 2 },
+      { x: 4, y: 6 },
+      { x: 11, y: 6 },
+    ],
+    heroes: [
+      {
+        type: heroTypes.warrior,
+        position: { x: 1, y: 2, },
+      },
+      {
+        type: heroTypes.wizard,
+        position: { x: 11, y: 2, },
+      },
+      {
+        type: heroTypes.thief,
+        position: { x: 1, y: 6, },
+      },
+    ],
+    goals: [
+      { x: 1, y: 9 },
+      { x: 1, y: 10 },
+      { x: 1, y: 11 },
+    ],
+    switchGates: [
+      {
+        color: switchGateColors.purple,
+        position: { x: 4, y: 10 },
+        switches: [
+          { x: 10, y: 6 },
+        ],
+      }
+    ],
+  },
 ]
 
 const tileSize = 55
@@ -929,9 +993,10 @@ const generateLevel = (index:number):State => {
       position: { x: 0, y: 0 },
       rotation: 0,
     },
-    heroes: level.heroes.map(hero => ({ 
+    heroes: level.heroes.map(hero => ({
       ...hero,
       direction: directions.right,
+      state: heroStates.idle,
     })),
     activeHeroIndex: 0,
     blocks: level.blocks ? level.blocks.map(position => ({ ...position })) : [],
@@ -1735,7 +1800,7 @@ const App = () => {
                     key={`col-${index}`}
                   >
                     <div 
-                      className="absolute w-full h-full"
+                      className="absolute w-full h-full flex items-center justify-center"
                       style={{
                         backgroundImage: `url(${tileset.img})`,
                         backgroundSize: `${bgSize.x}px ${bgSize.y}px`,
@@ -2024,7 +2089,11 @@ const App = () => {
 
           if (isActive) {
             if (hero.type === heroTypes.warrior) {
-              animation = "warrior__idle"
+              if (hero.state === heroStates.idle) {
+                animation = "warrior__idle"
+              } else if (hero.state === heroStates.walking) {
+                animation = "warrior__walk"
+              }
             } else if (hero.type === heroTypes.thief) {
               animation = "thief__idle"
             } else if (hero.type === heroTypes.wizard) {
@@ -2035,7 +2104,7 @@ const App = () => {
           return (
             <div
               key={`hero-${index}`}
-              className={classnames(`${animation} absolute rounded-full transition-all`, {
+              className={classnames(`absolute rounded-full transition-all`, {
                 "brightness-50": !isActive,
               })}
               style={{
@@ -2043,11 +2112,12 @@ const App = () => {
                 height: `${heroHeight}px`,
                 left: `${heroPosition.x}px`,
                 top: `${heroPosition.y}px`,
+                transitionDuration: `${heroWalkDuration}ms`,
                 zIndex,
               }}
             >
               <div 
-                className={classnames("w-full h-full", {
+                className={classnames(`${animation} w-full h-full`, {
                   "-scale-x-100": hero.direction === directions.left,
                 })}
                 style={{
