@@ -19,6 +19,7 @@ const enum entityTypes {
 const enum eventTypes {
   move = "move",
   switchHero = "switchHero",
+  destroy = "destroy",
 }
 
 const enum directions {
@@ -57,6 +58,28 @@ const enum tileTypes {
   wall = 2,
 }
 
+type BlockDestroyEvent = {
+  type: eventTypes.destroy,
+  entity: {
+    type: entityTypes.block,
+    index: number,
+    position: V2,
+  },
+}
+
+type HeroDestroyEvent = {
+  type: eventTypes.destroy,
+  entity: {
+    type: entityTypes.block | entityTypes.hero,
+    index: number,
+    position: V2,
+    heroType: heroTypes,
+    direction: directions.left | directions.right,
+  },
+}
+
+type DestroyEvent = BlockDestroyEvent | HeroDestroyEvent
+
 type Entity = (
   GateEntity
   | HeroEntity
@@ -64,7 +87,7 @@ type Entity = (
   | WallEntity
 )
 
-type Event = MoveEvent | SwitchHeroEvent
+type Event = MoveEvent | SwitchHeroEvent | DestroyEvent
 
 type GateEntity = {
   type: entityTypes.gate,
@@ -1113,15 +1136,39 @@ const handleUndo = (state:State):State => {
         from: { ...event.to },
         to: { ...event.from },
       }
+      newState = processEvent(newState, reversedEvent)
     } else if (event.type === eventTypes.switchHero) {
       reversedEvent = {
         ...event,
         previousActiveHeroIndex: event.nextActiveHeroIndex,
         nextActiveHeroIndex: event.previousActiveHeroIndex,
       }
+      newState = processEvent(newState, reversedEvent)
+    } else if (event.type === eventTypes.destroy) {
+      if (event.entity.type === entityTypes.block) {
+        newState = {
+          ...newState,
+          blocks: [
+            ...newState.blocks,
+            { ...event.entity.position },
+          ],
+        }
+      } else if (event.entity.type === entityTypes.hero) {
+        newState = {
+          ...newState,
+          heroes: [
+            ...newState.heroes,
+            {
+              type: event.entity.heroType,
+              direction: event.entity.direction,
+              position: { ...event.entity.position },
+              state: heroStates.idle,
+            },
+          ],
+        }
+      }
     }
 
-    newState = processEvent(newState, reversedEvent)
   })
 
   const turnsWithoutCurrentTurn = newState.turns.slice(0, -1)
@@ -1214,6 +1261,26 @@ const processEvent = (state:State, event:Event):State => {
     newState = {
       ...newState,
       activeHeroIndex: event.nextActiveHeroIndex,
+    }
+  } else if (event.type === eventTypes.destroy) {
+    event = event as DestroyEvent
+
+    if (event.entity.type === entityTypes.block) {
+      newState = {
+        ...newState,
+        blocks: [
+          ...newState.blocks.slice(0, event.entity.index),
+          ...newState.blocks.slice(event.entity.index + 1),
+        ],
+      }
+    } else if (event.entity.type === entityTypes.hero) {
+      newState = {
+        ...newState,
+        heroes: [
+          ...newState.heroes.slice(0, event.entity.index),
+          ...newState.heroes.slice(event.entity.index + 1),
+        ],
+      }
     }
   }
 
@@ -1564,7 +1631,54 @@ const App = () => {
       newState = processEvent(newState, event)
     })
 
-    const currentTurnEvents = [...events]
+    let currentTurnEvents = [...events]
+
+    const destroyEvents:DestroyEvent[] = []
+
+    const closedGatePositions:V2[] = []
+    newState.switchGates.forEach((gate, gateIndex) => {
+      if (!isGateOpen(newState, gateIndex)) {
+        closedGatePositions.push({ ...gate.position })
+      }
+    })
+    closedGatePositions.forEach((gatePosition) => {
+      newState.blocks.forEach((blockPosition, blockIndex) => {
+        if (v2Equal(blockPosition, gatePosition)) {
+          destroyEvents.push({
+            type: eventTypes.destroy,
+            entity: {
+              type: entityTypes.block,
+              index: blockIndex,
+              position: { ...blockPosition },
+            },
+          })
+        }
+      })
+      newState.heroes.forEach((hero, heroIndex) => {
+        if (v2Equal(hero.position, gatePosition)) {
+          destroyEvents.push({
+            type: eventTypes.destroy,
+            entity: {
+              type: entityTypes.hero,
+              index: heroIndex,
+              position: { ...hero.position },
+              heroType: hero.type,
+              direction: hero.direction,
+            },
+          })
+        }
+      })
+    })
+
+    destroyEvents.forEach(event => {
+      newState = processEvent(newState, event)
+    })
+
+    currentTurnEvents = [
+      ...currentTurnEvents,
+      ...destroyEvents,
+    ]
+
     newState = {
       ...newState,
       turns: [
