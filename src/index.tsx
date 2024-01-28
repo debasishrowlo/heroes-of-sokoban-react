@@ -868,15 +868,32 @@ const level16 = {
     {
       color: gateColors.yellow,
       position: { x: 8, y: 1 },
-      switches: [
-        { x: 4, y: 1 },
-      ],
+      switchIndices: [0],
+    },
+    {
+      color: gateColors.yellow,
+      position: { x: 9, y: 2 },
+      switchIndices: [0],
+    },
+  ],
+  switches: [
+    {
+      position: { x: 4, y: 1 },
+      color: gateColors.yellow,
     },
   ],
   heroes: [
     {
       type: heroTypes.wizard,
       position: { x: 1, y: 1 },
+    },
+    {
+      type: heroTypes.thief,
+      position: { x: 9, y: 3 },
+    },
+    {
+      type: heroTypes.warrior,
+      position: { x: 9, y: 4 },
     },
   ],
   goals: [
@@ -1108,7 +1125,7 @@ const levels:Level[] = [
   level13,
   level14,
   level15,
-  // 16
+  level16,
   level17,
   // 18
   level19,
@@ -2084,7 +2101,9 @@ const App = () => {
                         backgroundSize: `${bgSize.x}px ${bgSize.y}px`,
                         backgroundPosition: `${surfaceBackgroundX}px ${surfaceBackgroundY}px`,
                       }}
-                    ></div>
+                    >
+                      <span className="hidden">{col},{row}</span>
+                    </div>
                   </div>
                 )
               })}
