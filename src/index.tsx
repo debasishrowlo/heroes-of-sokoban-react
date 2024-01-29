@@ -957,6 +957,68 @@ const level17 = {
     { x: 5, y: 5 },
   ],
 }
+const level18 = {
+  tilemap: [
+    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+    2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2,
+    2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2,
+    2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2,
+    2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 1, 2, 2,
+    2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2,
+    2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
+    2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2,
+    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  ],
+  tilesPerRow: 13,
+  heroes: [
+    {
+      type: heroTypes.warrior,
+      position: { x: 5, y: 2 },
+    },
+    {
+      type: heroTypes.thief,
+      position: { x: 6, y: 2 },
+    },
+    {
+      type: heroTypes.wizard,
+      position: { x: 7, y: 2 },
+    },
+  ],
+  goals: [
+    { x: 5, y: 1 },
+    { x: 7, y: 1 },
+    { x: 10, y: 2 },
+  ],
+  gates: [
+    {
+      color: gateColors.yellow,
+      position: { x: 2, y: 4 },
+      switchIndices: [0],
+    },
+    {
+      color: gateColors.yellow,
+      position: { x: 10, y: 4 },
+      switchIndices: [0],
+    },
+  ],
+  switches: [
+    {
+      position: { x: 2, y: 6 },
+      color: gateColors.yellow,
+    },
+    {
+      position: { x: 6, y: 6 },
+      color: gateColors.yellow,
+    },
+    {
+      position: { x: 10, y: 6 },
+      color: gateColors.yellow,
+    },
+  ],
+  blocks: [
+    { x: 2, y: 2 },
+  ],
+}
 const level19 = {
   textures: {
     surfaces: [1, 3, 3, 3, 3, 3, 4, 21, 6, 6, 6, 6, 6, 21, 21, 6, 6, 6, 6, 6, 21, 21, 6, 6, 6, 6, 6, 21, 21, 6, 6, 6, 6, 6, 21, 21, 6, 6, 6, 6, 6, 21, 31, 3, 3, 3, 3, 3, 34],
@@ -1127,7 +1189,7 @@ const levels:Level[] = [
   level15,
   level16,
   level17,
-  // 18
+  level18,
   level19,
   // 20,
   level21,
