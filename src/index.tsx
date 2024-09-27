@@ -14,6 +14,8 @@ import { State } from "./types"
 import { getRows } from "./lib/tilemap"
 
 import Game from "./Game"
+import GameOverScreen from "./GameOverScreen"
+import LevelSelectScreen from "./LevelSelectScreen"
 
 import "./index.css"
 
@@ -48,6 +50,7 @@ const generateLevel = (index:number):State => {
       top: 0,
     },
   }
+
   const rows = getRows(level)
   const cols = level.tilesPerRow
   state.margin.left = (window.innerWidth - (cols * tileSize)) / 2
@@ -56,52 +59,20 @@ const generateLevel = (index:number):State => {
   return state
 }
 
-const LevelSelectScreen = ({
-  loadLevel,
-}: {
-  loadLevel: (index: number) => void;
-}) => {
-  return (
-    <div className="container h-screen mx-auto flex items-center justify-center max-w-2xl">
-      <div>
-        <h1 className="text-20 text-white">Select Level</h1>
-        <div className="mt-4 flex flex-wrap gap-6">
-          {levels.map((_, index) => {
-            return (
-              <button 
-                type="button" 
-                className="w-20 aspect-square bg-gray-200 hover:bg-gray-400 text-24 font-bold text-gray-800 rounded-6" 
-                key={index}
-                onClick={() => loadLevel(index)}
-              >
-                {index + 1}
-              </button>
-            )
-          })}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-const GameOverScreen = () => {
-  return (
-    <div className="fixed z-50 w-full h-full flex items-center justify-center">
-      <div className="px-20 py-20 flex-col border border-white rounded-xl">
-        <p className="text-center text-28 text-white">Thank you for playing</p>
-        <p className="mt-14 text-center text-20 text-white">Press <span className="text-yellow-400">X</span> to continue</p>
-      </div>
-    </div>
-  )
+const isGameOver = (state:State) => {
+  return state.gameStatus === gameStatuses.win
 }
 
 const App = () => {
-  // const [state, setState] = useState<State>(generateLevel(0))
-  const [state, setState] = useState<State>(generateLevel(15))
+  const [state, setState] = useState<State>(generateLevel(0))
   const [imagesLoading, setImagesLoading] = useState(true)
 
   const loadLevel = (index:number) => {
     setState(generateLevel(index))
+  }
+
+  const showLevelSelectScreen = () => {
+    setState(null)
   }
 
   const preloadImages = async () => {
@@ -129,10 +100,6 @@ const App = () => {
     return imagesLoading || state.gameStatus === gameStatuses.loading
   }
 
-  const isGameOver = () => {
-    return state.gameStatus === gameStatuses.win
-  }
-
   const levelNotSelected = () => {
     return state === null
   }
@@ -149,8 +116,13 @@ const App = () => {
     return null
   }
 
-  if (isGameOver()) {
-    return <GameOverScreen />
+  if (isGameOver(state)) {
+    return (
+      <GameOverScreen
+        state={state}
+        showLevelSelectScreen={showLevelSelectScreen}
+      />
+    )
   }
 
   return (
@@ -158,6 +130,7 @@ const App = () => {
       state={state}
       setState={setState}
       loadLevel={loadLevel}
+      showLevelSelectScreen={showLevelSelectScreen}
     />
   )
 }

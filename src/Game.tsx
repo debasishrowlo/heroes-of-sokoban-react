@@ -538,10 +538,6 @@ const isGamePaused = (state:State) => {
   return state.gameStatus === gameStatuses.paused
 }
 
-const isGameOver = (state:State) => {
-  return state.gameStatus === gameStatuses.win
-}
-
 const isInvalidKeyPressed = (e:KeyboardEvent) => {
   const supportedKeys = [
     "x", "X",
@@ -919,7 +915,7 @@ const isPopupVisible = (state:State) => {
   return state.popup.visible
 }
 
-const isXKeyPressed = (e:KeyboardEvent) => {
+export const isXKeyPressed = (e:KeyboardEvent) => {
   return e.key.toLowerCase() === "x"
 }
 
@@ -939,18 +935,14 @@ const Game = ({
   state,
   setState,
   loadLevel,
+  showLevelSelectScreen,
 } : {
   state: State,
   setState: React.Dispatch<React.SetStateAction<State>>,
   loadLevel: (index:number) => void,
+  showLevelSelectScreen: () => void,
 }) => {
   const handleKeyDown = (e:KeyboardEvent) => {
-    // TODO: (BUG) continue not working after all levels are cleared. Move game over condition to the GameOverScreen component
-    if (isGameOver(state)) {
-      handleGameOverKeyDown(e)
-      return
-    }
-
     if (
       isInvalidKeyPressed(e) ||
       isGamePaused(state)
@@ -959,7 +951,7 @@ const Game = ({
     }
 
     if (isPopupVisible(state)) {
-      handlePopupVisibleKeyDown(e)
+      handlePopupKeyDown(e)
       return
     }
 
@@ -1033,15 +1025,9 @@ const Game = ({
     setState(state)
   }
 
-  const handlePopupVisibleKeyDown = (e:KeyboardEvent) => {
+  const handlePopupKeyDown = (e:KeyboardEvent) => {
     if (isXKeyPressed(e)) {
       hidePopup()
-    }
-  }
-
-  const handleGameOverKeyDown = (e:KeyboardEvent) => {
-    if (isXKeyPressed(e)) {
-      showLevelSelect()
     }
   }
 
@@ -1287,10 +1273,6 @@ const Game = ({
     loadLevel(state.levelIndex)
   }
 
-  const showLevelSelect = () => {
-    setState(null)
-  }
-
   useEffect(() => {
     document.addEventListener("keydown", handleKeyDown)
     window.addEventListener("resize", handleResize)
@@ -1309,7 +1291,7 @@ const Game = ({
         <button
           type="button" 
           className="p-4 text-18 text-gray-100"
-          onClick={() => showLevelSelect()}
+          onClick={() => showLevelSelectScreen()}
         >
           Levels
         </button>
