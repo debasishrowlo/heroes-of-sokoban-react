@@ -13,7 +13,7 @@
     "sourceMap": true,
     "target": "ES2020",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./src/*"]
     }
   },
   "include": [
