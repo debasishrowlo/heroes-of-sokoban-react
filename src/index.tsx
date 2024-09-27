@@ -96,7 +96,8 @@ const GameOverScreen = () => {
 }
 
 const App = () => {
-  const [state, setState] = useState<State>(generateLevel(0))
+  // const [state, setState] = useState<State>(generateLevel(0))
+  const [state, setState] = useState<State>(generateLevel(15))
   const [imagesLoading, setImagesLoading] = useState(true)
 
   const loadLevel = (index:number) => {
